@@ -27,7 +27,8 @@ public static class CostReader
                 var entry = JsonSerializer.Deserialize<CostEntry>(json, _options);
                 if (entry is not null) entries.Add(entry);
             }
-            catch { /* skip malformed files */ }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception) { /* skip malformed/unreadable files */ }
         }
 
         return entries.OrderBy(e => e.Timestamp).ToList();

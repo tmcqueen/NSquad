@@ -30,7 +30,9 @@ public sealed class SquadCoordinator
         var matched = _router.Match(message);
         if (matched is not null)
         {
-            _ = _eventBus.PublishAsync(new CoordinatorRoutingEvent(null, matched, "single", message));
+            // Fire-and-forget: routing events are observability-only; failures are non-fatal.
+            _ = _eventBus.PublishAsync(new CoordinatorRoutingEvent(null, matched, "single", message))
+                .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
             return matched;
         }
 
@@ -38,7 +40,9 @@ public sealed class SquadCoordinator
                        ?? _config.Agents.FirstOrDefault()?.Name
                        ?? throw new InvalidOperationException("No agents configured.");
 
-        _ = _eventBus.PublishAsync(new CoordinatorRoutingEvent(null, fallback, "fallback", message));
+        // Fire-and-forget: routing events are observability-only; failures are non-fatal.
+        _ = _eventBus.PublishAsync(new CoordinatorRoutingEvent(null, fallback, "fallback", message))
+            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
         return fallback;
     }
 }

@@ -11,7 +11,7 @@ public sealed class SquadClient : IAsyncDisposable
 {
     private readonly CopilotClient _inner;
     private readonly EventBus? _eventBus;
-    private bool _disposed;
+    private int _disposed; // 0 = alive, 1 = disposed (use Interlocked)
 
     private SquadClient(CopilotClient inner, EventBus? eventBus)
     {
@@ -92,8 +92,7 @@ public sealed class SquadClient : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_disposed) return;
-        _disposed = true;
+        if (Interlocked.Exchange(ref _disposed, 1) == 1) return;
         await _inner.StopAsync();
     }
 }

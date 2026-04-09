@@ -47,7 +47,7 @@ public sealed class SquadSession : IAsyncDisposable
             }
         });
 
-        ct.Register(() => done.TrySetCanceled(ct));
+        using var reg = ct.Register(() => done.TrySetCanceled(ct));
         await _inner.SendAsync(new MessageOptions { Prompt = prompt });
         await done.Task;
 
@@ -72,7 +72,8 @@ public sealed class SquadSession : IAsyncDisposable
                 case AssistantMessageDeltaEvent delta:
                     onDelta(delta.Data.DeltaContent);
                     if (_eventBus is not null)
-                        _ = _eventBus.PublishAsync(new StreamDeltaEvent(SessionId, AgentName, delta.Data.DeltaContent, 0));
+                        _ = _eventBus.PublishAsync(new StreamDeltaEvent(SessionId, AgentName, delta.Data.DeltaContent, 0))
+                            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
                     break;
                 case GitHub.Copilot.SDK.SessionIdleEvent:
                     done.TrySetResult();
@@ -83,7 +84,7 @@ public sealed class SquadSession : IAsyncDisposable
             }
         });
 
-        ct.Register(() => done.TrySetCanceled(ct));
+        using var reg = ct.Register(() => done.TrySetCanceled(ct));
         await _inner.SendAsync(new MessageOptions { Prompt = prompt });
         await done.Task;
     }
@@ -103,17 +104,20 @@ public sealed class SquadSession : IAsyncDisposable
     private void WireEvents()
     {
         if (_eventBus is null) return;
-        _ = _eventBus.PublishAsync(new SessionCreatedEvent(SessionId, AgentName));
+        _ = _eventBus.PublishAsync(new SessionCreatedEvent(SessionId, AgentName))
+            .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
 
         _inner.On(evt =>
         {
             switch (evt)
             {
                 case GitHub.Copilot.SDK.SessionIdleEvent:
-                    _ = _eventBus.PublishAsync(new Events.SessionIdleEvent(SessionId, AgentName));
+                    _ = _eventBus.PublishAsync(new Events.SessionIdleEvent(SessionId, AgentName))
+                        .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
                     break;
                 case GitHub.Copilot.SDK.SessionErrorEvent err:
-                    _ = _eventBus.PublishAsync(new Events.SessionErrorEvent(SessionId, AgentName, err.Data.Message));
+                    _ = _eventBus.PublishAsync(new Events.SessionErrorEvent(SessionId, AgentName, err.Data.Message))
+                        .ContinueWith(t => { }, TaskContinuationOptions.OnlyOnFaulted);
                     break;
             }
         });
