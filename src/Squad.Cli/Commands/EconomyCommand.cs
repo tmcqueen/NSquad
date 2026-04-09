@@ -18,15 +18,15 @@ public sealed class EconomyCommand : AsyncCommand<EconomyCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var squadDir = PathResolver.ResolveSquadDir(cwd);
+        string cwd = Directory.GetCurrentDirectory();
+        string? squadDir = PathResolver.ResolveSquadDir(cwd);
         if (squadDir == null)
         {
             AnsiConsole.MarkupLine("[red]✗[/] No squad found. Run [bold]squad init[/] first.");
             return 1;
         }
 
-        var rootDir = Path.GetDirectoryName(squadDir)!;
+        string rootDir = Path.GetDirectoryName(squadDir)!;
 
         switch (settings.Mode?.ToLowerInvariant())
         {
@@ -39,7 +39,7 @@ public sealed class EconomyCommand : AsyncCommand<EconomyCommand.Settings>
                 AnsiConsole.MarkupLine("[green]✓[/] Economy mode [bold]disabled[/].");
                 break;
             case null:
-                var enabled = GetEconomyMode(rootDir);
+                bool enabled = GetEconomyMode(rootDir);
                 AnsiConsole.MarkupLine("\n[bold]Economy Mode[/]\n");
                 AnsiConsole.MarkupLine("  Status: " + (enabled ? "[green]enabled[/]" : "[dim]disabled[/]"));
                 if (!enabled) AnsiConsole.MarkupLine("  Usage: [bold]squad economy on | off[/]\n");
@@ -53,7 +53,7 @@ public sealed class EconomyCommand : AsyncCommand<EconomyCommand.Settings>
 
     public static void SetEconomyMode(string rootDir, bool enabled)
     {
-        var squadDir = Path.Combine(rootDir, ".squad");
+        string squadDir = Path.Combine(rootDir, ".squad");
         var cfg = LocalSquadConfig.Load(squadDir);
         cfg = cfg with { EconomyMode = enabled };
         cfg.Save(squadDir);
@@ -61,7 +61,7 @@ public sealed class EconomyCommand : AsyncCommand<EconomyCommand.Settings>
 
     public static bool GetEconomyMode(string rootDir)
     {
-        var squadDir = Path.Combine(rootDir, ".squad");
+        string squadDir = Path.Combine(rootDir, ".squad");
         return LocalSquadConfig.Load(squadDir).EconomyMode;
     }
 }

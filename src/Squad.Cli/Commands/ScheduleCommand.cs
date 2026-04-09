@@ -31,7 +31,7 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         switch (settings.Action?.ToLowerInvariant() ?? "list")
         {
             case "init":
@@ -56,8 +56,8 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
 
     public static async Task InitAsync(string cwd, CancellationToken ct = default)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
-        var path = Path.Combine(squadDir, "schedule.json");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string path = Path.Combine(squadDir, "schedule.json");
         if (File.Exists(path)) return; // idempotent
 
         Directory.CreateDirectory(squadDir);
@@ -78,22 +78,22 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
 
     public static async Task<ScheduleManifest> LoadScheduleAsync(string cwd, CancellationToken ct = default)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
-        var path = Path.Combine(squadDir, "schedule.json");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string path = Path.Combine(squadDir, "schedule.json");
         if (!File.Exists(path))
             throw new InvalidOperationException("No schedule.json found — run 'squad schedule init' to create one.");
-        var json = await File.ReadAllTextAsync(path, ct);
+        string json = await File.ReadAllTextAsync(path, ct);
         return JsonSerializer.Deserialize<ScheduleManifest>(json, _opts) ?? new ScheduleManifest();
     }
 
     private static async Task<ScheduleState> LoadStateAsync(string cwd, CancellationToken ct = default)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
-        var path = Path.Combine(squadDir, ".schedule-state.json");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string path = Path.Combine(squadDir, ".schedule-state.json");
         if (!File.Exists(path)) return new ScheduleState();
         try
         {
-            var json = await File.ReadAllTextAsync(path, ct);
+            string json = await File.ReadAllTextAsync(path, ct);
             return JsonSerializer.Deserialize<ScheduleState>(json, _opts) ?? new ScheduleState();
         }
         catch { return new ScheduleState(); }
@@ -101,7 +101,7 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
 
     private static async Task SaveStateAsync(string cwd, ScheduleState state, CancellationToken ct = default)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
         await File.WriteAllTextAsync(Path.Combine(squadDir, ".schedule-state.json"),
             JsonSerializer.Serialize(state, _opts) + "\n", ct);
     }
@@ -126,7 +126,7 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
         AnsiConsole.MarkupLine("\n[bold]Configured Schedules[/] ({0}):\n", manifest.Schedules.Count);
         foreach (var e in manifest.Schedules)
         {
-            var status = e.Enabled ? "[green]● enabled[/]" : "[dim]○ disabled[/]";
+            string status = e.Enabled ? "[green]● enabled[/]" : "[dim]○ disabled[/]";
             AnsiConsole.MarkupLine("  [bold]{0}[/] — {1}", Markup.Escape(e.Id), Markup.Escape(e.Name));
             AnsiConsole.MarkupLine("    {0}  │  {1}  │  {2}:{3}", status, Markup.Escape(FormatTrigger(e)),
                 Markup.Escape(e.Task?.Type ?? "?"), Markup.Escape(e.Task?.Ref ?? "?"));
@@ -145,11 +145,11 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
         foreach (var e in manifest.Schedules)
         {
             state.Runs.TryGetValue(e.Id, out var run);
-            var statusStr = run == null ? "[dim]– never run[/]"
+            string statusStr = run == null ? "[dim]– never run[/]"
                 : run.Status == "success" ? "[green]✓ success[/]"
                 : run.Status == "running" ? "[yellow]⟳ running[/]"
                 : "[red]✗ failure[/]";
-            var enabledStr = e.Enabled ? "" : " [dim](disabled)[/]";
+            string enabledStr = e.Enabled ? "" : " [dim](disabled)[/]";
             AnsiConsole.MarkupLine("  [bold]{0}[/]{1}", Markup.Escape(e.Id), enabledStr);
             AnsiConsole.MarkupLine("    {0}  │  last: {1}", statusStr, Markup.Escape(run?.LastRun ?? "–"));
             if (run?.Error != null) AnsiConsole.MarkupLine("    [red]error: {0}[/]", Markup.Escape(run.Error));

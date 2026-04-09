@@ -14,7 +14,7 @@ public sealed class CastCommand : AsyncCommand<CastCommand.Settings>
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = settings.Dir ?? Directory.GetCurrentDirectory();
+        string cwd = settings.Dir ?? Directory.GetCurrentDirectory();
         var agents = await LoadCastAsync(cwd);
 
         AnsiConsole.WriteLine();

@@ -30,7 +30,7 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         try
         {
             await ImportAsync(cwd, settings.ImportFile, settings.Force, cancellationToken);
@@ -53,14 +53,14 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
     public static async Task ImportAsync(
         string cwd, string importPath, bool force, CancellationToken ct = default)
     {
-        var resolvedPath = Path.GetFullPath(importPath);
+        string resolvedPath = Path.GetFullPath(importPath);
         if (!File.Exists(resolvedPath))
             throw new InvalidOperationException($"Import file not found: {importPath}");
 
         ExportManifest manifest;
         try
         {
-            var json = await File.ReadAllTextAsync(resolvedPath, ct);
+            string json = await File.ReadAllTextAsync(resolvedPath, ct);
             manifest = JsonSerializer.Deserialize<ExportManifest>(json, _opts)
                 ?? throw new InvalidOperationException("Empty import file.");
         }
@@ -71,15 +71,15 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
 
         ValidateManifest(manifest);
 
-        var squadDir = Path.Combine(cwd, ".squad");
+        string squadDir = Path.Combine(cwd, ".squad");
         if (Directory.Exists(squadDir))
         {
             if (!force)
                 throw new InvalidOperationException(
                     "A squad already exists here. Use --force to replace (current squad will be archived).");
 
-            var ts = DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
-            var archiveDir = Path.Combine(cwd, $".squad-archive-{ts}");
+            string ts = DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
+            string archiveDir = Path.Combine(cwd, $".squad-archive-{ts}");
             Directory.Move(squadDir, archiveDir);
             AnsiConsole.MarkupLine("[dim]Archived existing squad to {0}[/]", Markup.Escape(Path.GetFileName(archiveDir)));
         }
@@ -99,17 +99,17 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
         }
 
         // Write agents
-        var importDate = DateTimeOffset.UtcNow.ToString("O");
-        var sourceProject = Path.GetFileNameWithoutExtension(resolvedPath);
+        string importDate = DateTimeOffset.UtcNow.ToString("O");
+        string sourceProject = Path.GetFileNameWithoutExtension(resolvedPath);
         foreach (var (name, data) in manifest.Agents)
         {
-            var agentDir = Path.Combine(squadDir, "agents", name);
+            string agentDir = Path.Combine(squadDir, "agents", name);
             Directory.CreateDirectory(agentDir);
 
             if (data.Charter != null)
                 await File.WriteAllTextAsync(Path.Combine(agentDir, "charter.md"), data.Charter, ct);
 
-            var historyContent = data.History != null
+            string historyContent = data.History != null
                 ? HistorySplitter.Split(data.History, sourceProject)
                 : "";
             historyContent = $"📌 Imported from {sourceProject} on {importDate}. Portable knowledge carried over.\n\n"
@@ -118,15 +118,15 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
         }
 
         // Write skills
-        var skillsBase = Path.Combine(cwd, ".copilot", "skills");
-        foreach (var skillContent in manifest.Skills)
+        string skillsBase = Path.Combine(cwd, ".copilot", "skills");
+        foreach (string skillContent in manifest.Skills)
         {
             var nameMatch = System.Text.RegularExpressions.Regex.Match(
                 skillContent, @"^name:\s*[""']?(.+?)[""']?\s*$", System.Text.RegularExpressions.RegexOptions.Multiline);
-            var skillName = nameMatch.Success
+            string skillName = nameMatch.Success
                 ? nameMatch.Groups[1].Value.Trim().ToLowerInvariant().Replace(" ", "-")
                 : $"skill-{manifest.Skills.IndexOf(skillContent)}";
-            var skillDir = Path.Combine(skillsBase, skillName);
+            string skillDir = Path.Combine(skillsBase, skillName);
             Directory.CreateDirectory(skillDir);
             await File.WriteAllTextAsync(Path.Combine(skillDir, "SKILL.md"), skillContent, ct);
         }

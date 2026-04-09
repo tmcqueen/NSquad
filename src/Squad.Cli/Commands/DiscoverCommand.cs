@@ -8,7 +8,7 @@ public sealed class DiscoverCommand : AsyncCommand
 {
     protected override async Task<int> ExecuteAsync(CommandContext context, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         var squads = await SquadDiscovery.DiscoverAsync(cwd, ct);
         AnsiConsole.Write(SquadDiscovery.FormatTable(squads));
         return 0;

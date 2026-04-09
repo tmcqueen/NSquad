@@ -16,7 +16,7 @@ public sealed class PersonalRemoveCommand : AsyncCommand<PersonalRemoveCommand.S
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var personalDir = PathResolver.ResolvePersonalSquadDir();
+        string? personalDir = PathResolver.ResolvePersonalSquadDir();
         if (personalDir == null)
         {
             AnsiConsole.MarkupLine("[red]✗[/] Personal squad not initialized.");

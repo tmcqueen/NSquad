@@ -27,8 +27,8 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var mode = DetectMode(cwd);
+        string cwd = Directory.GetCurrentDirectory();
+        string mode = DetectMode(cwd);
 
         // --from ai-team
         if (settings.From?.ToLowerInvariant() == "ai-team")
@@ -96,7 +96,7 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
                 return 0;
             }
 
-            var configPath = Path.Combine(cwd, "squad.config.json");
+            string configPath = Path.Combine(cwd, "squad.config.json");
             await File.WriteAllTextAsync(configPath, json, ct);
             AnsiConsole.MarkupLine("[green]✓[/] Created squad.config.json");
             AnsiConsole.MarkupLine("\nNext steps:");
@@ -141,8 +141,8 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
 
     public static void MigrateFromAiTeam(string cwd)
     {
-        var src = Path.Combine(cwd, ".ai-team");
-        var dst = Path.Combine(cwd, ".squad");
+        string src = Path.Combine(cwd, ".ai-team");
+        string dst = Path.Combine(cwd, ".squad");
         if (Directory.Exists(dst))
             throw new InvalidOperationException(
                 ".squad/ already exists. Remove it manually before migrating from .ai-team/.");
@@ -151,10 +151,10 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
 
     public static string GenerateConfigJson(string cwd)
     {
-        var squadDir = Path.Combine(cwd, ".squad");
-        var teamName = ParseTeamName(squadDir);
+        string squadDir = Path.Combine(cwd, ".squad");
+        string teamName = ParseTeamName(squadDir);
         var members = ParseMembers(squadDir);
-        var defaultAgent = members.FirstOrDefault() ?? "builder";
+        string defaultAgent = members.FirstOrDefault() ?? "builder";
         var routingRules = ParseRoutingRules(squadDir);
 
         var config = new
@@ -174,9 +174,9 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
 
     private static string ParseTeamName(string squadDir)
     {
-        var path = Path.Combine(squadDir, "team.md");
+        string path = Path.Combine(squadDir, "team.md");
         if (!File.Exists(path)) return "untitled-squad";
-        foreach (var line in File.ReadAllLines(path))
+        foreach (string line in File.ReadAllLines(path))
         {
             var m = Regex.Match(line, @"^# Squad Team — (.+)");
             if (m.Success) return m.Groups[1].Value.Trim();
@@ -186,17 +186,17 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
 
     private static List<string> ParseMembers(string squadDir)
     {
-        var path = Path.Combine(squadDir, "team.md");
+        string path = Path.Combine(squadDir, "team.md");
         if (!File.Exists(path)) return new();
         var members = new List<string>();
-        var inMembers = false;
-        foreach (var line in File.ReadAllLines(path))
+        bool inMembers = false;
+        foreach (string line in File.ReadAllLines(path))
         {
             if (line.TrimStart().StartsWith("## Members")) { inMembers = true; continue; }
             if (inMembers && line.TrimStart().StartsWith("##")) break;
             if (inMembers && line.StartsWith('|') && !line.Contains("---") && !line.Contains("Name"))
             {
-                var cells = line.Split('|').Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
+                string[] cells = line.Split('|').Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
                 if (cells.Length >= 4 && cells[3].Contains("Active"))
                     members.Add(cells[0].ToLowerInvariant());
             }
@@ -206,19 +206,19 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
 
     private static string ParseAgentRole(string squadDir, string agentName)
     {
-        var charterPath = Path.Combine(squadDir, "agents", agentName, "charter.md");
+        string charterPath = Path.Combine(squadDir, "agents", agentName, "charter.md");
         if (!File.Exists(charterPath)) return agentName;
-        var first = File.ReadAllLines(charterPath).FirstOrDefault(l => l.StartsWith("# ")) ?? "";
+        string first = File.ReadAllLines(charterPath).FirstOrDefault(l => l.StartsWith("# ")) ?? "";
         var m = Regex.Match(first, @"^# \w+ — (.+)");
         return m.Success ? m.Groups[1].Value.Trim() : agentName;
     }
 
     private static List<(string pattern, string agent)> ParseRoutingRules(string squadDir)
     {
-        var path = Path.Combine(squadDir, "routing.md");
+        string path = Path.Combine(squadDir, "routing.md");
         if (!File.Exists(path)) return new();
         var rules = new List<(string, string)>();
-        foreach (var line in File.ReadAllLines(path))
+        foreach (string line in File.ReadAllLines(path))
         {
             var m = Regex.Match(line, @"^-\s+`(.+?)`\s*→\s*(\S+)");
             if (m.Success) rules.Add((m.Groups[1].Value, m.Groups[2].Value));

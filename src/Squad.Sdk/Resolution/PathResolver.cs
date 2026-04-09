@@ -66,7 +66,7 @@ public static class PathResolver
         try
         {
             var json = File.ReadAllText(configPath);
-            using var doc = JsonDocument.Parse(json);
+            using JsonDocument doc = JsonDocument.Parse(json);
             if (doc.RootElement.TryGetProperty("teamRoot", out var teamRoot)
                 && teamRoot.GetString() is { Length: > 0 })
                 return SquadMode.Remote;

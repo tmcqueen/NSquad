@@ -25,8 +25,8 @@ public sealed class ExportCommand : AsyncCommand<ExportCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var squadDir = PathResolver.ResolveSquadDir(cwd);
+        string cwd = Directory.GetCurrentDirectory();
+        string? squadDir = PathResolver.ResolveSquadDir(cwd);
         if (squadDir == null || !File.Exists(Path.Combine(squadDir, "team.md")))
         {
             AnsiConsole.MarkupLine("[red]✗[/] No squad found — run init first.");
@@ -34,7 +34,7 @@ public sealed class ExportCommand : AsyncCommand<ExportCommand.Settings>
         }
 
         var manifest = await BuildManifestAsync(cwd, cancellationToken);
-        var outPath = settings.Output ?? Path.Combine(cwd, "squad-export.json");
+        string outPath = settings.Output ?? Path.Combine(cwd, "squad-export.json");
         await File.WriteAllTextAsync(outPath, JsonSerializer.Serialize(manifest, _opts) + "\n", cancellationToken);
 
         AnsiConsole.MarkupLine("[green]✓[/] Exported squad to [bold]{0}[/]",
@@ -46,20 +46,20 @@ public sealed class ExportCommand : AsyncCommand<ExportCommand.Settings>
     public static async Task<ExportManifest> BuildManifestAsync(
         string cwd, CancellationToken ct = default)
     {
-        var squadDir = Path.Combine(cwd, ".squad");
+        string squadDir = Path.Combine(cwd, ".squad");
         var manifest = new ExportManifest();
 
         // Casting
-        var castingDir = Path.Combine(squadDir, "casting");
+        string castingDir = Path.Combine(squadDir, "casting");
         if (Directory.Exists(castingDir))
         {
-            foreach (var file in new[] { "registry.json", "policy.json", "history.json" })
+            foreach (string? file in new[] { "registry.json", "policy.json", "history.json" })
             {
-                var filePath = Path.Combine(castingDir, file);
+                string filePath = Path.Combine(castingDir, file);
                 if (!File.Exists(filePath)) continue;
                 try
                 {
-                    var json = await File.ReadAllTextAsync(filePath, ct);
+                    string json = await File.ReadAllTextAsync(filePath, ct);
                     manifest.Casting[Path.GetFileNameWithoutExtension(file)] =
                         JsonSerializer.Deserialize<JsonElement>(json);
                 }
@@ -68,14 +68,14 @@ public sealed class ExportCommand : AsyncCommand<ExportCommand.Settings>
         }
 
         // Agents
-        var agentsDir = Path.Combine(squadDir, "agents");
+        string agentsDir = Path.Combine(squadDir, "agents");
         if (Directory.Exists(agentsDir))
         {
-            foreach (var entry in Directory.GetDirectories(agentsDir))
+            foreach (string entry in Directory.GetDirectories(agentsDir))
             {
-                var name = Path.GetFileName(entry);
-                var charterPath = Path.Combine(entry, "charter.md");
-                var historyPath = Path.Combine(entry, "history.md");
+                string name = Path.GetFileName(entry);
+                string charterPath = Path.Combine(entry, "charter.md");
+                string historyPath = Path.Combine(entry, "history.md");
                 manifest.Agents[name] = new AgentExportData(
                     File.Exists(charterPath) ? await File.ReadAllTextAsync(charterPath, ct) : null,
                     File.Exists(historyPath) ? await File.ReadAllTextAsync(historyPath, ct) : null);
@@ -83,12 +83,12 @@ public sealed class ExportCommand : AsyncCommand<ExportCommand.Settings>
         }
 
         // Skills (nested layout: .squad/skills/<name>/SKILL.md)
-        var skillsDir = Path.Combine(squadDir, "skills");
+        string skillsDir = Path.Combine(squadDir, "skills");
         if (Directory.Exists(skillsDir))
         {
-            foreach (var entry in Directory.GetDirectories(skillsDir))
+            foreach (string entry in Directory.GetDirectories(skillsDir))
             {
-                var skillFile = Path.Combine(entry, "SKILL.md");
+                string skillFile = Path.Combine(entry, "SKILL.md");
                 if (File.Exists(skillFile))
                     manifest.Skills.Add(await File.ReadAllTextAsync(skillFile, ct));
             }

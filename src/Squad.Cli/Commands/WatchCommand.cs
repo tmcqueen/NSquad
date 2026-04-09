@@ -26,15 +26,15 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
             return 1;
         }
 
-        var cwd = Directory.GetCurrentDirectory();
-        var squadDir = PathResolver.ResolveSquadDir(cwd);
+        string cwd = Directory.GetCurrentDirectory();
+        string? squadDir = PathResolver.ResolveSquadDir(cwd);
         if (squadDir == null || !File.Exists(Path.Combine(squadDir, "team.md")))
         {
             AnsiConsole.MarkupLine("[red]✗[/] No squad found — run init first.");
             return 1;
         }
 
-        var teamMdContent = await File.ReadAllTextAsync(Path.Combine(squadDir, "team.md"), ct);
+        string teamMdContent = await File.ReadAllTextAsync(Path.Combine(squadDir, "team.md"), ct);
         var roster = IssueTriager.ParseRoster(teamMdContent);
         if (roster.Count == 0)
         {
@@ -50,7 +50,7 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
             Markup.Escape(settings.Interval.ToString()));
 
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(settings.Interval));
-        var round = 0;
+        int round = 0;
 
         // Run immediately
         round++;
@@ -75,7 +75,7 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
         CancellationToken ct)
     {
         int untriaged = 0, assigned = 0, triaged = 0;
-        var timestamp = DateTime.Now.ToLongTimeString();
+        string timestamp = DateTime.Now.ToLongTimeString();
 
         try
         {
@@ -91,14 +91,14 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
                 var result = IssueTriager.Triage(issue.Title, null, issueLabels, rules, roster);
                 if (result != null)
                 {
-                    var ok = await AddLabelAsync(issue.Number, result.Agent.Label, ct);
+                    bool ok = await AddLabelAsync(issue.Number, result.Agent.Label, ct);
                     if (ok)
                     {
                         triaged++;
                         AnsiConsole.MarkupLine("[green]✓[/] [[{0}]] Triaged #{1} \"{2}\" → {3}",
-                            Markup.Escape(timestamp), 
-                            Markup.Escape(issue.Number.ToString()), 
-                            Markup.Escape(issue.Title), 
+                            Markup.Escape(timestamp),
+                            Markup.Escape(issue.Number.ToString()),
+                            Markup.Escape(issue.Title),
                             Markup.Escape(result.Agent.Name));
                     }
                 }
@@ -106,8 +106,8 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] [[{0}]] Check failed: {1}", 
-                Markup.Escape(timestamp), 
+            AnsiConsole.MarkupLine("[red]✗[/] [[{0}]] Check failed: {1}",
+                Markup.Escape(timestamp),
                 Markup.Escape(ex.Message));
         }
 
@@ -121,10 +121,10 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
         if (lines.Count > 0)
         {
             AnsiConsole.MarkupLine("\n[bold]Round {0}[/]", Markup.Escape(round.ToString()));
-            foreach (var l in lines) AnsiConsole.MarkupLine(Markup.Escape(l!));
+            foreach (string? l in lines) AnsiConsole.MarkupLine(Markup.Escape(l!));
         }
         else
-            AnsiConsole.MarkupLine("[dim blue][[{0}]] Board is clear — Ralph is idling.[/]", 
+            AnsiConsole.MarkupLine("[dim blue][[{0}]] Board is clear — Ralph is idling.[/]",
                 Markup.Escape(timestamp));
     }
 
@@ -140,7 +140,7 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
         };
         using var proc = System.Diagnostics.Process.Start(psi)
             ?? throw new InvalidOperationException("gh CLI not found.");
-        var stdout = await proc.StandardOutput.ReadToEndAsync(ct);
+        string stdout = await proc.StandardOutput.ReadToEndAsync(ct);
         await proc.WaitForExitAsync(ct);
         if (proc.ExitCode != 0) return Array.Empty<GhIssue>();
 

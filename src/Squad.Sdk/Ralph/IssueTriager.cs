@@ -27,7 +27,7 @@ public static class IssueTriager
     /// </summary>
     public static IReadOnlyList<RosterMember> ParseRoster(string teamMdContent)
     {
-        var members = new List<RosterMember>();
+        List<RosterMember> members = new List<RosterMember>();
         var inMembers = false;
 
         foreach (var line in teamMdContent.Split('\n'))

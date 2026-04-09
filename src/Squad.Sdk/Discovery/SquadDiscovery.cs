@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Squad.Sdk.Config;
 
@@ -45,7 +46,7 @@ public static class SquadDiscovery
         }
         catch { return Array.Empty<DiscoveredSquad>(); }
 
-        var discovered = new List<DiscoveredSquad>();
+        List<DiscoveredSquad> discovered = new List<DiscoveredSquad>();
         foreach (var upstream in config.Upstreams.Where(u => u.Type == "local"))
         {
             var manifestPath = Path.Combine(upstream.Source, ".squad", "squad.manifest.json");
@@ -67,7 +68,7 @@ public static class SquadDiscovery
     public static string FormatTable(IReadOnlyList<DiscoveredSquad> squads)
     {
         if (squads.Count == 0) return "No squads discovered.";
-        var sb = new System.Text.StringBuilder("\nDiscovered Squads:\n\n");
+        StringBuilder sb = new System.Text.StringBuilder("\nDiscovered Squads:\n\n");
         foreach (var s in squads)
         {
             sb.AppendLine($"  {s.Manifest.Name}");

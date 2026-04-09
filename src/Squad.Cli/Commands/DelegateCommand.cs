@@ -21,14 +21,14 @@ public sealed class DelegateCommand : AsyncCommand<DelegateCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         var squads = await SquadDiscovery.DiscoverAsync(cwd, ct);
         var target = squads.FirstOrDefault(s =>
             s.Manifest.Name.Equals(settings.SquadName, StringComparison.OrdinalIgnoreCase));
 
         if (target == null)
         {
-            var names = string.Join(", ", squads.Select(s => s.Manifest.Name));
+            string names = string.Join(", ", squads.Select(s => s.Manifest.Name));
             AnsiConsole.MarkupLine("[red]✗[/] Squad \"{0}\" not found.{1}",
                 Markup.Escape(settings.SquadName),
                 names.Length > 0 ? $" Known squads: {Markup.Escape(names)}" : " No squads discovered.");
@@ -42,8 +42,8 @@ public sealed class DelegateCommand : AsyncCommand<DelegateCommand.Settings>
             return 1;
         }
 
-        var title = $"[cross-squad] {settings.Description}";
-        var body = $"""
+        string title = $"[cross-squad] {settings.Description}";
+        string body = $"""
             ## Cross-Squad Work Request
 
             **To:** {target.Manifest.Name} ({target.Manifest.Contact.Repo})
@@ -58,7 +58,7 @@ public sealed class DelegateCommand : AsyncCommand<DelegateCommand.Settings>
             - [ ] Originating squad notified of completion
             """;
 
-        var labels = string.Join(",", target.Manifest.Contact.Labels.Append("cross-squad"));
+        string labels = string.Join(",", target.Manifest.Contact.Labels.Append("cross-squad"));
         var psi = new System.Diagnostics.ProcessStartInfo("gh",
             $"issue create --repo {target.Manifest.Contact.Repo} --title \"{EscapeArg(title)}\" --body \"{EscapeArg(body)}\" --label \"{labels}\"")
         {
@@ -71,7 +71,7 @@ public sealed class DelegateCommand : AsyncCommand<DelegateCommand.Settings>
         var stderrTask = proc.StandardError.ReadToEndAsync(ct);
         await Task.WhenAll(stdoutTask, stderrTask);
         await proc.WaitForExitAsync(ct);
-        var url = stdoutTask.Result.Trim();
+        string url = stdoutTask.Result.Trim();
 
         if (proc.ExitCode == 0)
             AnsiConsole.MarkupLine("[green]✓[/] Created cross-squad issue: {0}", Markup.Escape(url));

@@ -8,7 +8,7 @@ public sealed class PersonalListCommand : AsyncCommand
 {
     protected override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
-        var personalDir = PathResolver.ResolvePersonalSquadDir();
+        string? personalDir = PathResolver.ResolvePersonalSquadDir();
         if (personalDir == null)
         {
             AnsiConsole.MarkupLine("[dim]No personal squad found. Run [bold]squad personal init[/].[/]");
@@ -26,7 +26,7 @@ public sealed class PersonalListCommand : AsyncCommand
             .AddColumn("Name")
             .AddColumn("Charter Path");
 
-        foreach (var name in agents)
+        foreach (string name in agents)
             table.AddRow(name, Path.Combine(personalDir, "agents", name, "charter.md"));
 
         AnsiConsole.Write(table);

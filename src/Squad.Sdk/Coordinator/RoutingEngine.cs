@@ -17,7 +17,7 @@ public sealed class RoutingEngine
         _compiled = rules
             .Select(r =>
             {
-                var regex = new Regex(r.Pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+                Regex regex = new Regex(r.Pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
                 return (regex, r.Agent);
             })
             .ToList();

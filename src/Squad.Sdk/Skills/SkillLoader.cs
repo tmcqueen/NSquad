@@ -15,7 +15,7 @@ public static class SkillLoader
         if (!Directory.Exists(skillsDir))
             return [];
 
-        var skills = new List<SkillDefinition>();
+        List<SkillDefinition> skills = new List<SkillDefinition>();
         foreach (var dir in Directory.GetDirectories(skillsDir))
         {
             var skillMd = System.IO.Path.Combine(dir, "SKILL.md");

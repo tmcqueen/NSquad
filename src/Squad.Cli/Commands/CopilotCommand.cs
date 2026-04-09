@@ -22,16 +22,16 @@ public sealed class CopilotCommand : AsyncCommand<CopilotCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var squadDir = PathResolver.ResolveSquadDir(cwd);
+        string cwd = Directory.GetCurrentDirectory();
+        string? squadDir = PathResolver.ResolveSquadDir(cwd);
         if (squadDir == null || !Directory.Exists(squadDir))
         {
             AnsiConsole.MarkupLine("[red]✗[/] No squad found — run init first.");
             return 1;
         }
 
-        var content = TeamMdHelper.ReadTeamMd(squadDir);
-        var hasCopilot = TeamMdHelper.HasCopilot(content);
+        string content = TeamMdHelper.ReadTeamMd(squadDir);
+        bool hasCopilot = TeamMdHelper.HasCopilot(content);
 
         if (settings.Off)
         {
@@ -44,7 +44,7 @@ public sealed class CopilotCommand : AsyncCommand<CopilotCommand.Settings>
             TeamMdHelper.WriteTeamMd(squadDir, content);
             AnsiConsole.MarkupLine("[green]✓[/] Removed @copilot from team roster.");
 
-            var instructionsPath = Path.Combine(cwd, ".github", "copilot-instructions.md");
+            string instructionsPath = Path.Combine(cwd, ".github", "copilot-instructions.md");
             if (File.Exists(instructionsPath))
             {
                 File.Delete(instructionsPath);
@@ -64,7 +64,7 @@ public sealed class CopilotCommand : AsyncCommand<CopilotCommand.Settings>
         AnsiConsole.MarkupLine("[green]✓[/] Added @copilot (Coding Agent) to team roster.");
 
         // Write copilot-instructions.md
-        var destPath = Path.Combine(cwd, ".github", "copilot-instructions.md");
+        string destPath = Path.Combine(cwd, ".github", "copilot-instructions.md");
         Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
         File.WriteAllText(destPath, GenerateCopilotInstructions());
         AnsiConsole.MarkupLine("[green]✓[/] Created .github/copilot-instructions.md.");

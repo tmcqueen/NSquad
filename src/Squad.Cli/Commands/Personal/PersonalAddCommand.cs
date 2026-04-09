@@ -20,8 +20,8 @@ public sealed class PersonalAddCommand : AsyncCommand<PersonalAddCommand.Setting
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var globalDir = PathResolver.ResolveGlobalSquadPath();
-        var personalDir = Path.Combine(globalDir, "personal-squad");
+        string globalDir = PathResolver.ResolveGlobalSquadPath();
+        string personalDir = Path.Combine(globalDir, "personal-squad");
 
         if (!Directory.Exists(personalDir))
         {

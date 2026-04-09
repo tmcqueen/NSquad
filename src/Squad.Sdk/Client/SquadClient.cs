@@ -25,7 +25,7 @@ public sealed class SquadClient : IAsyncDisposable
         EventBus? eventBus = null,
         CancellationToken ct = default)
     {
-        var clientOptions = new CopilotClientOptions
+        CopilotClientOptions clientOptions = new CopilotClientOptions
         {
             CliPath = options?.CliPath,
             Cwd = options?.WorkingDirectory,
@@ -34,7 +34,7 @@ public sealed class SquadClient : IAsyncDisposable
             Environment = options?.Environment,
         };
 
-        var client = new CopilotClient(clientOptions);
+        CopilotClient client = new CopilotClient(clientOptions);
         await client.StartAsync(ct);
         return new SquadClient(client, eventBus);
     }
@@ -44,7 +44,7 @@ public sealed class SquadClient : IAsyncDisposable
         SquadSessionOptions? options = null,
         CancellationToken ct = default)
     {
-        var sessionConfig = new SessionConfig
+        SessionConfig sessionConfig = new SessionConfig
         {
             OnPermissionRequest = PermissionHandler.ApproveAll,
             Model = options?.Model,

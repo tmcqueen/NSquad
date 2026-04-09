@@ -30,8 +30,8 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var squadDir = Path.Combine(cwd, ".squad");
+        string cwd = Directory.GetCurrentDirectory();
+        string squadDir = Path.Combine(cwd, ".squad");
 
         if (!Directory.Exists(squadDir))
         {
@@ -45,7 +45,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
             return 1;
         }
 
-        var sourceSquad = GetSourceSquad(squadDir);
+        string? sourceSquad = GetSourceSquad(squadDir);
         if (sourceSquad == null)
         {
             AnsiConsole.MarkupLine("[red]✗[/] Missing sourceSquad in .squad/config.json.");
@@ -53,7 +53,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
         }
 
         // License check
-        var licensePath = Path.Combine(cwd, "LICENSE");
+        string licensePath = Path.Combine(cwd, "LICENSE");
         var license = File.Exists(licensePath)
             ? LicenseDetector.Detect(await File.ReadAllTextAsync(licensePath, ct))
             : new LicenseInfo("unknown");
@@ -103,7 +103,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
 
     public static bool IsConsultMode(string squadDir)
     {
-        var configPath = Path.Combine(squadDir, "config.json");
+        string configPath = Path.Combine(squadDir, "config.json");
         if (!File.Exists(configPath)) return false;
         try
         {
@@ -115,7 +115,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
 
     public static string? GetSourceSquad(string squadDir)
     {
-        var configPath = Path.Combine(squadDir, "config.json");
+        string configPath = Path.Combine(squadDir, "config.json");
         if (!File.Exists(configPath)) return null;
         try
         {
@@ -127,7 +127,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
 
     public static string FormatLearningPreview(string content)
     {
-        var preview = content.Replace('\n', ' ').Trim();
+        string preview = content.Replace('\n', ' ').Trim();
         return preview.Length > 50 ? preview[..50] + "..." : preview;
     }
 
@@ -155,7 +155,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
                 "✓", i + 1, Markup.Escape(learnings[i].Filename), Markup.Escape(FormatLearningPreview(learnings[i].Content)));
 
         AnsiConsole.Write("\nAccept all? [Y/n] ");
-        var input = Console.ReadLine()?.Trim().ToLowerInvariant();
+        string? input = Console.ReadLine()?.Trim().ToLowerInvariant();
         if (input == "n" || input == "no") return Array.Empty<StagedLearning>();
         return learnings;
     }

@@ -16,7 +16,7 @@ public sealed class InitRemoteCommand : AsyncCommand<InitRemoteCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         try
         {
             LinkCommand.WriteRemoteConfig(cwd, settings.TeamRepoPath);

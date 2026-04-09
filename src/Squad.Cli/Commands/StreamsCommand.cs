@@ -30,7 +30,7 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         switch (settings.Action?.ToLowerInvariant() ?? "list")
         {
             case "list":
@@ -58,12 +58,12 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
 
     public static async Task<SubSquadsConfig> LoadConfigAsync(string cwd, CancellationToken ct = default)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
-        var path = Path.Combine(squadDir, "streams.json");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string path = Path.Combine(squadDir, "streams.json");
         if (!File.Exists(path)) return new SubSquadsConfig();
         try
         {
-            var json = await File.ReadAllTextAsync(path, ct);
+            string json = await File.ReadAllTextAsync(path, ct);
             return JsonSerializer.Deserialize<SubSquadsConfig>(json, _opts) ?? new SubSquadsConfig();
         }
         catch { return new SubSquadsConfig(); }
@@ -71,7 +71,7 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
 
     public static string? GetActiveStream(string cwd)
     {
-        var path = Path.Combine(cwd, ".squad-workstream");
+        string path = Path.Combine(cwd, ".squad-workstream");
         if (!File.Exists(path)) return null;
         return File.ReadAllText(path).Trim();
     }
@@ -84,7 +84,7 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
     private static async Task ListAsync(string cwd, CancellationToken ct)
     {
         var cfg = await LoadConfigAsync(cwd, ct);
-        var active = GetActiveStream(cwd);
+        string? active = GetActiveStream(cwd);
 
         if (cfg.Workstreams.Count == 0)
         {
@@ -97,8 +97,8 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
 
         foreach (var ws in cfg.Workstreams)
         {
-            var isActive = active == ws.Name;
-            var marker = isActive ? "[green]● active[/]" : "[dim]○[/]";
+            bool isActive = active == ws.Name;
+            string marker = isActive ? "[green]● active[/]" : "[dim]○[/]";
             AnsiConsole.MarkupLine("  {0}  [bold]{1}[/]", marker, Markup.Escape(ws.Name));
             AnsiConsole.MarkupLine("       Label: {0}", Markup.Escape(ws.LabelFilter));
             AnsiConsole.MarkupLine("       Workflow: {0}", Markup.Escape(ws.Workflow ?? cfg.DefaultWorkflow));
@@ -118,12 +118,12 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
         }
 
         AnsiConsole.MarkupLine("\n[bold]SubSquad Status[/]\n");
-        var active = GetActiveStream(cwd);
+        string? active = GetActiveStream(cwd);
 
         foreach (var ws in cfg.Workstreams)
         {
-            var isActive = active == ws.Name;
-            var marker = isActive ? "[green]●[/]" : "[dim]○[/]";
+            bool isActive = active == ws.Name;
+            string marker = isActive ? "[green]●[/]" : "[dim]○[/]";
             AnsiConsole.MarkupLine("  {0} [bold]{1}[/] ({2})", marker, Markup.Escape(ws.Name), Markup.Escape(ws.LabelFilter));
 
             // Best-effort gh pr list
@@ -136,7 +136,7 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
             try
             {
                 using var proc = System.Diagnostics.Process.Start(psi);
-                var stdout = await proc!.StandardOutput.ReadToEndAsync(ct);
+                string stdout = await proc!.StandardOutput.ReadToEndAsync(ct);
                 await proc.WaitForExitAsync(ct);
                 if (proc.ExitCode == 0)
                 {
