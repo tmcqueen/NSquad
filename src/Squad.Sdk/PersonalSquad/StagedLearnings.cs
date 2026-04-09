@@ -1,18 +1,14 @@
 namespace Squad.Sdk.PersonalSquad;
 
 /// <summary>A single staged learning file loaded from <c>.squad/extract/</c>.</summary>
-public sealed record StagedLearning(
-    /// <summary>File name (e.g. <c>2024-01-15-auth.md</c>).</summary>
-    string Filename,
-    /// <summary>Absolute file path.</summary>
-    string Filepath,
-    /// <summary>Full markdown content of the learning file.</summary>
-    string Content);
+/// <param name="Filename">File name (e.g. <c>2024-01-15-auth.md</c>).</param>
+/// <param name="Filepath">Absolute file path.</param>
+/// <param name="Content">Full markdown content of the learning file.</param>
+public sealed record StagedLearning(string Filename, string Filepath, string Content);
 
 /// <summary>Result of merging staged learnings into <c>decisions.md</c>.</summary>
-public sealed record MergeResult(
-    /// <summary>Number of learning entries that were merged.</summary>
-    int Decisions);
+/// <param name="Decisions">Number of learning entries that were merged.</param>
+public sealed record MergeResult(int Decisions);
 
 /// <summary>Loads and merges staged learning files from <c>.squad/extract/</c>.</summary>
 public static class StagedLearnings

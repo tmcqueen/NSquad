@@ -19,18 +19,14 @@ public sealed record ScheduleTrigger
 }
 
 /// <summary>Task to execute when the schedule fires.</summary>
-public sealed record ScheduleTask(
-    /// <summary>Task type identifier.</summary>
-    string Type,
-    /// <summary>Reference to the task definition (e.g. agent name or skill path).</summary>
-    string Ref);
+/// <param name="Type">Task type identifier.</param>
+/// <param name="Ref">Reference to the task definition (e.g. agent name or skill path).</param>
+public sealed record ScheduleTask(string Type, string Ref);
 
 /// <summary>Retry policy for failed schedule runs.</summary>
-public sealed record ScheduleRetry(
-    /// <summary>Maximum number of retry attempts.</summary>
-    int MaxRetries,
-    /// <summary>Seconds to wait between retries.</summary>
-    int BackoffSeconds);
+/// <param name="MaxRetries">Maximum number of retry attempts.</param>
+/// <param name="BackoffSeconds">Seconds to wait between retries.</param>
+public sealed record ScheduleRetry(int MaxRetries, int BackoffSeconds);
 
 /// <summary>A single schedule definition in .squad/schedules.json.</summary>
 public sealed record ScheduleEntry
@@ -54,27 +50,22 @@ public sealed record ScheduleEntry
 }
 
 /// <summary>Collection of schedule definitions loaded from .squad/schedules.json.</summary>
-public sealed record ScheduleManifest(
-    /// <summary>All defined schedules.</summary>
-    List<ScheduleEntry> Schedules)
+/// <param name="Schedules">All defined schedules.</param>
+public sealed record ScheduleManifest(List<ScheduleEntry> Schedules)
 {
     /// <summary>Create an empty manifest.</summary>
     public ScheduleManifest() : this(new List<ScheduleEntry>()) { }
 }
 
 /// <summary>Persisted result of a single schedule execution.</summary>
-public sealed record ScheduleRun(
-    /// <summary>ISO 8601 timestamp of the last execution.</summary>
-    string LastRun,
-    /// <summary>Execution status: success, failure, or running.</summary>
-    string Status,
-    /// <summary>Error message if status is failure, otherwise null.</summary>
-    string? Error = null);
+/// <param name="LastRun">ISO 8601 timestamp of the last execution.</param>
+/// <param name="Status">Execution status: success, failure, or running.</param>
+/// <param name="Error">Error message if status is failure, otherwise null.</param>
+public sealed record ScheduleRun(string LastRun, string Status, string? Error = null);
 
 /// <summary>Persisted execution state for all schedules.</summary>
-public sealed record ScheduleState(
-    /// <summary>Maps schedule id to its last run state.</summary>
-    Dictionary<string, ScheduleRun> Runs)
+/// <param name="Runs">Maps schedule id to its last run state.</param>
+public sealed record ScheduleState(Dictionary<string, ScheduleRun> Runs)
 {
     /// <summary>Create an empty state.</summary>
     public ScheduleState() : this(new Dictionary<string, ScheduleRun>()) { }

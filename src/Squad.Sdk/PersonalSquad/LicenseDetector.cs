@@ -3,11 +3,9 @@ using System.Text.RegularExpressions;
 namespace Squad.Sdk.PersonalSquad;
 
 /// <summary>The result of a license detection pass on a LICENSE file.</summary>
-public sealed record LicenseInfo(
-    /// <summary>License classification: <c>permissive</c>, <c>copyleft</c>, or <c>unknown</c>.</summary>
-    string Type,
-    /// <summary>SPDX identifier (e.g. <c>MIT</c>, <c>Apache-2.0</c>, <c>GPL-3.0</c>), or null if unrecognised.</summary>
-    string? SpdxId = null);
+/// <param name="Type">License classification: <c>permissive</c>, <c>copyleft</c>, or <c>unknown</c>.</param>
+/// <param name="SpdxId">SPDX identifier (e.g. <c>MIT</c>, <c>Apache-2.0</c>, <c>GPL-3.0</c>), or null if unrecognised.</param>
+public sealed record LicenseInfo(string Type, string? SpdxId = null);
 
 /// <summary>
 /// Detects license type from LICENSE file content.
