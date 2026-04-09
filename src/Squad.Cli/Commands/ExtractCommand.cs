@@ -61,7 +61,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
         if (license.Type == "copyleft" && !settings.AcceptRisks)
         {
             AnsiConsole.MarkupLine("[red]🚫[/] License: {0} — Extraction blocked. Use --accept-risks to override.",
-                license.SpdxId ?? "copyleft");
+                Markup.Escape(license.SpdxId ?? "copyleft"));
             return 1;
         }
 
@@ -82,7 +82,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
         {
             AnsiConsole.MarkupLine("[dim]📋 Dry-run — {0} learning(s) staged:[/]", staged.Count);
             foreach (var l in staged)
-                AnsiConsole.MarkupLine("   - {0}: \"{1}\"", l.Filename, FormatLearningPreview(l.Content));
+                AnsiConsole.MarkupLine("   - {0}: \"{1}\"", Markup.Escape(l.Filename), Markup.Escape(FormatLearningPreview(l.Content)));
             return 0;
         }
 
@@ -152,7 +152,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
         AnsiConsole.MarkupLine("[bold]{0} learning(s) staged:[/]\n", learnings.Count);
         for (int i = 0; i < learnings.Count; i++)
             AnsiConsole.MarkupLine("  [{0}] {1}. {2}: \"{3}\"",
-                "✓", i + 1, learnings[i].Filename, FormatLearningPreview(learnings[i].Content));
+                "✓", i + 1, Markup.Escape(learnings[i].Filename), Markup.Escape(FormatLearningPreview(learnings[i].Content)));
 
         AnsiConsole.Write("\nAccept all? [Y/n] ");
         var input = Console.ReadLine()?.Trim().ToLowerInvariant();

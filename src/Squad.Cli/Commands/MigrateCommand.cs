@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using Spectre.Console.Json;
 using System.ComponentModel;
 
 namespace Squad.Cli.Commands;
@@ -43,7 +44,7 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
                 AnsiConsole.MarkupLine("[green]✓[/] Renamed .ai-team/ → .squad/");
             }
             else
-                AnsiConsole.MarkupLine("[dim][DRY RUN][/] Would rename .ai-team/ → .squad/");
+                AnsiConsole.MarkupLine("[dim][[DRY RUN]][/] Would rename .ai-team/ → .squad/");
             return 0;
         }
 
@@ -70,7 +71,7 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
                 }
             }
             else
-                AnsiConsole.MarkupLine("[dim][DRY RUN][/] Would run squad build to generate .squad/ markdown.");
+                AnsiConsole.MarkupLine("[dim][[DRY RUN]][/] Would run squad build to generate .squad/ markdown.");
             return 0;
         }
 
@@ -90,8 +91,8 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
             }
             if (settings.DryRun)
             {
-                AnsiConsole.MarkupLine("[dim][DRY RUN][/] Generated squad.config.json:\n");
-                AnsiConsole.Write(json);
+                AnsiConsole.MarkupLine("[dim][[DRY RUN]][/] Generated squad.config.json:\n");
+                AnsiConsole.Write(new JsonText(json));
                 return 0;
             }
 
@@ -105,7 +106,7 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
         }
 
         // No mode — show current state
-        AnsiConsole.MarkupLine("\n[bold]Squad Migrate[/] — current mode: [bold]{0}[/]\n", mode);
+        AnsiConsole.MarkupLine("\n[bold]Squad Migrate[/] — current mode: [bold]{0}[/]\n", Markup.Escape(mode));
         switch (mode)
         {
             case "none":

@@ -38,7 +38,7 @@ public sealed class ExportCommand : AsyncCommand<ExportCommand.Settings>
         await File.WriteAllTextAsync(outPath, JsonSerializer.Serialize(manifest, _opts) + "\n", cancellationToken);
 
         AnsiConsole.MarkupLine("[green]✓[/] Exported squad to [bold]{0}[/]",
-            Path.GetRelativePath(cwd, outPath));
+            Markup.Escape(Path.GetRelativePath(cwd, outPath)));
         AnsiConsole.MarkupLine("[yellow]⚠[/] Review agent histories before sharing — they may contain project-specific information.");
         return 0;
     }

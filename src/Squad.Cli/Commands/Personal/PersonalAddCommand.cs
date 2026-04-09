@@ -32,11 +32,11 @@ public sealed class PersonalAddCommand : AsyncCommand<PersonalAddCommand.Setting
         try
         {
             PersonalHelper.AddAgent(personalDir, settings.Name, settings.Role);
-            AnsiConsole.MarkupLine("[green]✓[/] Added personal agent: [bold]{0}[/] (role: {1})", settings.Name, settings.Role);
+            AnsiConsole.MarkupLine("[green]✓[/] Added personal agent: [bold]{0}[/] (role: {1})", Markup.Escape(settings.Name), Markup.Escape(settings.Role));
         }
         catch (InvalidOperationException ex)
         {
-            AnsiConsole.MarkupLine("[yellow]⚠[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[yellow]⚠[/] {0}", Markup.Escape(ex.Message));
         }
         return 0;
     }

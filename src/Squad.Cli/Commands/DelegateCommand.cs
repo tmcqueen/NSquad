@@ -30,15 +30,15 @@ public sealed class DelegateCommand : AsyncCommand<DelegateCommand.Settings>
         {
             var names = string.Join(", ", squads.Select(s => s.Manifest.Name));
             AnsiConsole.MarkupLine("[red]✗[/] Squad \"{0}\" not found.{1}",
-                settings.SquadName,
-                names.Length > 0 ? $" Known squads: {names}" : " No squads discovered.");
+                Markup.Escape(settings.SquadName),
+                names.Length > 0 ? $" Known squads: {Markup.Escape(names)}" : " No squads discovered.");
             return 1;
         }
 
         if (!target.Manifest.Accepts.Contains("issues"))
         {
             AnsiConsole.MarkupLine("[red]✗[/] Squad \"{0}\" does not accept issues. Accepts: {1}",
-                settings.SquadName, string.Join(", ", target.Manifest.Accepts));
+                Markup.Escape(settings.SquadName), Markup.Escape(string.Join(", ", target.Manifest.Accepts)));
             return 1;
         }
 
@@ -74,7 +74,7 @@ public sealed class DelegateCommand : AsyncCommand<DelegateCommand.Settings>
         var url = stdoutTask.Result.Trim();
 
         if (proc.ExitCode == 0)
-            AnsiConsole.MarkupLine("[green]✓[/] Created cross-squad issue: {0}", url);
+            AnsiConsole.MarkupLine("[green]✓[/] Created cross-squad issue: {0}", Markup.Escape(url));
         else
         {
             AnsiConsole.MarkupLine("[red]✗[/] Failed to create issue.");

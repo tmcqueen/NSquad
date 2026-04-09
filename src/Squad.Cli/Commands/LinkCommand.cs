@@ -22,11 +22,11 @@ public sealed class LinkCommand : AsyncCommand<LinkCommand.Settings>
         {
             WriteRemoteConfig(cwd, settings.TeamRepoPath);
             AnsiConsole.MarkupLine("[green]✓[/] Linked to team root: [dim]{0}[/]",
-                Path.GetRelativePath(cwd, Path.GetFullPath(settings.TeamRepoPath)));
+                Markup.Escape(Path.GetRelativePath(cwd, Path.GetFullPath(settings.TeamRepoPath))));
         }
         catch (InvalidOperationException ex)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message));
             return 1;
         }
         return 0;

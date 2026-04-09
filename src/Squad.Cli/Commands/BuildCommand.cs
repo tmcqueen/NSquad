@@ -45,7 +45,7 @@ public sealed class BuildCommand : AsyncCommand<BuildCommand.Settings>
             {
                 var exists = File.Exists(Path.Combine(cwd, f.RelPath));
                 AnsiConsole.MarkupLine("  {0}  {1}",
-                    exists ? "[yellow]overwrite[/]" : "[green]create[/]", f.RelPath);
+                    exists ? "[yellow]overwrite[/]" : "[green]create[/]", Markup.Escape(f.RelPath));
             }
             return 0;
         }

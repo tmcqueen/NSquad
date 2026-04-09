@@ -22,7 +22,7 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
         try { ValidateInterval(settings.Interval); }
         catch (ArgumentException ex)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message));
             return 1;
         }
 
@@ -47,7 +47,7 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
 
         AnsiConsole.MarkupLine("\n[bold]🔄 Ralph — Watch Mode[/]");
         AnsiConsole.MarkupLine("[dim]Polling every {0} minute(s) for squad work. Ctrl+C to stop.[/]\n",
-            settings.Interval);
+            Markup.Escape(settings.Interval.ToString()));
 
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(settings.Interval));
         var round = 0;
@@ -96,7 +96,7 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
                     {
                         triaged++;
                         AnsiConsole.MarkupLine("[green]✓[/] [{0}] Triaged #{1} \"{2}\" → {3}",
-                            timestamp, issue.Number, Markup.Escape(issue.Title), result.Agent.Name);
+                            timestamp, issue.Number, Markup.Escape(issue.Title), Markup.Escape(result.Agent.Name));
                     }
                 }
             }
@@ -116,7 +116,7 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
         if (lines.Count > 0)
         {
             AnsiConsole.MarkupLine("\n[bold]Round {0}[/]", round);
-            foreach (var l in lines) AnsiConsole.MarkupLine(l!);
+            foreach (var l in lines) AnsiConsole.MarkupLine(Markup.Escape(l!));
         }
         else
             AnsiConsole.MarkupLine("[dim][{0}] Board is clear — Ralph is idling.[/]", timestamp);

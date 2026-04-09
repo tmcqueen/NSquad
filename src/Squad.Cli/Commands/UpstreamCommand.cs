@@ -55,9 +55,9 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
                 try
                 {
                     await AddAsync(cwd, settings.SourceOrName, settings.Name, settings.Ref, ct);
-                    AnsiConsole.MarkupLine("[green]✓[/] Added upstream: [bold]{0}[/]", settings.Name ?? settings.SourceOrName);
+                    AnsiConsole.MarkupLine("[green]✓[/] Added upstream: [bold]{0}[/]", Markup.Escape(settings.Name ?? settings.SourceOrName));
                 }
-                catch (Exception ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message); return 1; }
+                catch (Exception ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message)); return 1; }
                 break;
 
             case "remove":
@@ -69,9 +69,9 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
                 try
                 {
                     await RemoveAsync(cwd, settings.SourceOrName, ct);
-                    AnsiConsole.MarkupLine("[green]✓[/] Removed upstream: [bold]{0}[/]", settings.SourceOrName);
+                    AnsiConsole.MarkupLine("[green]✓[/] Removed upstream: [bold]{0}[/]", Markup.Escape(settings.SourceOrName));
                 }
-                catch (Exception ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message); return 1; }
+                catch (Exception ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message)); return 1; }
                 break;
 
             case "list":
@@ -203,7 +203,8 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
             var synced = u.LastSynced != null ? $"synced {u.LastSynced.Split('T')[0]}" : "never synced";
             var refStr = u.Ref != null ? $" (ref: {u.Ref})" : "";
             AnsiConsole.MarkupLine("  [bold]{0}[/]  →  {1}: {2}{3}  [dim]({4})[/]",
-                u.Name, u.Type, u.Source, refStr, synced);
+                Markup.Escape(u.Name), Markup.Escape(u.Type), Markup.Escape(u.Source),
+                Markup.Escape(refStr), Markup.Escape(synced));
         }
     }
 
@@ -216,9 +217,10 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
 
         if (toSync.Count == 0)
         {
-            AnsiConsole.MarkupLine(specificName != null
-                ? $"[red]✗[/] Upstream \"{specificName}\" not found."
-                : "[dim]No upstreams configured.[/]");
+            if (specificName != null)
+                AnsiConsole.MarkupLine("[red]✗[/] Upstream \"{0}\" not found.", Markup.Escape(specificName));
+            else
+                AnsiConsole.MarkupLine("[dim]No upstreams configured.[/]");
             return;
         }
 
@@ -230,9 +232,9 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
         {
             if (upstream.Type is "local" or "export")
             {
-                if (!Path.Exists(upstream.Source)) { AnsiConsole.MarkupLine("[yellow]⚠[/] {0}: not found", upstream.Name); continue; }
+                if (!Path.Exists(upstream.Source)) { AnsiConsole.MarkupLine("[yellow]⚠[/] {0}: not found", Markup.Escape(upstream.Name)); continue; }
                 synced++;
-                AnsiConsole.MarkupLine("[green]✓[/] {0} (read live): validated", upstream.Name);
+                AnsiConsole.MarkupLine("[green]✓[/] {0} (read live): validated", Markup.Escape(upstream.Name));
             }
             else if (upstream.Type == "git")
             {
@@ -256,10 +258,10 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
                 if (proc.ExitCode == 0)
                 {
                     synced++;
-                    AnsiConsole.MarkupLine("[green]✓[/] {0} (git — synced)", upstream.Name);
+                    AnsiConsole.MarkupLine("[green]✓[/] {0} (git — synced)", Markup.Escape(upstream.Name));
                 }
                 else
-                    AnsiConsole.MarkupLine("[yellow]⚠[/] {0}: git sync failed", upstream.Name);
+                    AnsiConsole.MarkupLine("[yellow]⚠[/] {0}: git sync failed", Markup.Escape(upstream.Name));
             }
         }
 

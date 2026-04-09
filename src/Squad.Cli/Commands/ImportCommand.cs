@@ -37,7 +37,7 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
         }
         catch (InvalidOperationException ex)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message));
             return 1;
         }
         return 0;
@@ -81,7 +81,7 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
             var ts = DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH-mm-ss");
             var archiveDir = Path.Combine(cwd, $".squad-archive-{ts}");
             Directory.Move(squadDir, archiveDir);
-            AnsiConsole.MarkupLine("[dim]Archived existing squad to {0}[/]", Path.GetFileName(archiveDir));
+            AnsiConsole.MarkupLine("[dim]Archived existing squad to {0}[/]", Markup.Escape(Path.GetFileName(archiveDir)));
         }
 
         // Create directory structure
@@ -131,8 +131,8 @@ public sealed class ImportCommand : AsyncCommand<ImportCommand.Settings>
             await File.WriteAllTextAsync(Path.Combine(skillDir, "SKILL.md"), skillContent, ct);
         }
 
-        AnsiConsole.MarkupLine("[green]✓[/] Imported squad from [bold]{0}[/]", Path.GetFileName(resolvedPath));
-        AnsiConsole.MarkupLine("  {0} agents: {1}", manifest.Agents.Count, string.Join(", ", manifest.Agents.Keys));
+        AnsiConsole.MarkupLine("[green]✓[/] Imported squad from [bold]{0}[/]", Markup.Escape(Path.GetFileName(resolvedPath)));
+        AnsiConsole.MarkupLine("  {0} agents: {1}", manifest.Agents.Count, Markup.Escape(string.Join(", ", manifest.Agents.Keys)));
         AnsiConsole.MarkupLine("  {0} skills imported", manifest.Skills.Count);
         AnsiConsole.MarkupLine("[yellow]⚠[/] Project-specific learnings are marked in agent histories — review if needed.");
     }

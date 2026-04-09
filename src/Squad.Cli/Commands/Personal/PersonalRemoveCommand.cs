@@ -26,11 +26,11 @@ public sealed class PersonalRemoveCommand : AsyncCommand<PersonalRemoveCommand.S
         try
         {
             PersonalHelper.RemoveAgent(personalDir, settings.Name);
-            AnsiConsole.MarkupLine("[green]✓[/] Removed personal agent: [bold]{0}[/]", settings.Name);
+            AnsiConsole.MarkupLine("[green]✓[/] Removed personal agent: [bold]{0}[/]", Markup.Escape(settings.Name));
         }
         catch (InvalidOperationException ex)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message));
             return 1;
         }
         return 0;

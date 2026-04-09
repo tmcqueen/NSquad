@@ -46,7 +46,7 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
                     return 1;
                 }
                 ActivateStream(cwd, settings.Name);
-                AnsiConsole.MarkupLine("[green]✓[/] Activated SubSquad: [bold]{0}[/]", settings.Name);
+                AnsiConsole.MarkupLine("[green]✓[/] Activated SubSquad: [bold]{0}[/]", Markup.Escape(settings.Name));
                 AnsiConsole.MarkupLine("[dim]  Written to .squad-workstream (gitignored — local to your machine)[/]");
                 break;
             default:
@@ -93,17 +93,17 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
         }
 
         AnsiConsole.MarkupLine("\n[bold]Configured SubSquads[/]\n");
-        AnsiConsole.MarkupLine("  Default workflow: {0}\n", cfg.DefaultWorkflow);
+        AnsiConsole.MarkupLine("  Default workflow: {0}\n", Markup.Escape(cfg.DefaultWorkflow));
 
         foreach (var ws in cfg.Workstreams)
         {
             var isActive = active == ws.Name;
             var marker = isActive ? "[green]● active[/]" : "[dim]○[/]";
-            AnsiConsole.MarkupLine("  {0}  [bold]{1}[/]", marker, ws.Name);
-            AnsiConsole.MarkupLine("       Label: {0}", ws.LabelFilter);
-            AnsiConsole.MarkupLine("       Workflow: {0}", ws.Workflow ?? cfg.DefaultWorkflow);
+            AnsiConsole.MarkupLine("  {0}  [bold]{1}[/]", marker, Markup.Escape(ws.Name));
+            AnsiConsole.MarkupLine("       Label: {0}", Markup.Escape(ws.LabelFilter));
+            AnsiConsole.MarkupLine("       Workflow: {0}", Markup.Escape(ws.Workflow ?? cfg.DefaultWorkflow));
             if (!string.IsNullOrEmpty(ws.Description))
-                AnsiConsole.MarkupLine("       [dim]{0}[/]", ws.Description);
+                AnsiConsole.MarkupLine("       [dim]{0}[/]", Markup.Escape(ws.Description));
             AnsiConsole.WriteLine();
         }
     }
@@ -124,7 +124,7 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
         {
             var isActive = active == ws.Name;
             var marker = isActive ? "[green]●[/]" : "[dim]○[/]";
-            AnsiConsole.MarkupLine("  {0} [bold]{1}[/] ({2})", marker, ws.Name, ws.LabelFilter);
+            AnsiConsole.MarkupLine("  {0} [bold]{1}[/] ({2})", marker, Markup.Escape(ws.Name), Markup.Escape(ws.LabelFilter));
 
             // Best-effort gh pr list
             var psi = new System.Diagnostics.ProcessStartInfo("gh",
@@ -145,7 +145,7 @@ public sealed class StreamsCommand : AsyncCommand<StreamsCommand.Settings>
                         foreach (var pr in prs)
                             AnsiConsole.MarkupLine("    PR #{0}: {1}",
                                 pr.GetProperty("number").GetInt32(),
-                                pr.GetProperty("title").GetString() ?? "");
+                                Markup.Escape(pr.GetProperty("title").GetString() ?? ""));
                     else
                         AnsiConsole.MarkupLine("    [dim]No open PRs[/]");
                 }

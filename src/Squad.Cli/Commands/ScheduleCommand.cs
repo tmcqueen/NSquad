@@ -119,7 +119,7 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
     {
         ScheduleManifest manifest;
         try { manifest = await LoadScheduleAsync(cwd, ct); }
-        catch (InvalidOperationException ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message); return; }
+        catch (InvalidOperationException ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message)); return; }
 
         if (manifest.Schedules.Count == 0) { AnsiConsole.MarkupLine("[dim]No schedules configured.[/]"); return; }
 
@@ -127,9 +127,9 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
         foreach (var e in manifest.Schedules)
         {
             var status = e.Enabled ? "[green]● enabled[/]" : "[dim]○ disabled[/]";
-            AnsiConsole.MarkupLine("  [bold]{0}[/] — {1}", e.Id, e.Name);
-            AnsiConsole.MarkupLine("    {0}  │  {1}  │  {2}:{3}", status, FormatTrigger(e),
-                e.Task?.Type ?? "?", e.Task?.Ref ?? "?");
+            AnsiConsole.MarkupLine("  [bold]{0}[/] — {1}", Markup.Escape(e.Id), Markup.Escape(e.Name));
+            AnsiConsole.MarkupLine("    {0}  │  {1}  │  {2}:{3}", status, Markup.Escape(FormatTrigger(e)),
+                Markup.Escape(e.Task?.Type ?? "?"), Markup.Escape(e.Task?.Ref ?? "?"));
         }
     }
 
@@ -137,7 +137,7 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
     {
         ScheduleManifest manifest;
         try { manifest = await LoadScheduleAsync(cwd, ct); }
-        catch (InvalidOperationException ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message); return; }
+        catch (InvalidOperationException ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message)); return; }
 
         var state = await LoadStateAsync(cwd, ct);
         AnsiConsole.MarkupLine("\n[bold]Schedule Status[/]\n");
@@ -150,9 +150,9 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
                 : run.Status == "running" ? "[yellow]⟳ running[/]"
                 : "[red]✗ failure[/]";
             var enabledStr = e.Enabled ? "" : " [dim](disabled)[/]";
-            AnsiConsole.MarkupLine("  [bold]{0}[/]{1}", e.Id, enabledStr);
-            AnsiConsole.MarkupLine("    {0}  │  last: {1}", statusStr, run?.LastRun ?? "–");
-            if (run?.Error != null) AnsiConsole.MarkupLine("    [red]error: {0}[/]", run.Error);
+            AnsiConsole.MarkupLine("  [bold]{0}[/]{1}", Markup.Escape(e.Id), enabledStr);
+            AnsiConsole.MarkupLine("    {0}  │  last: {1}", statusStr, Markup.Escape(run?.LastRun ?? "–"));
+            if (run?.Error != null) AnsiConsole.MarkupLine("    [red]error: {0}[/]", Markup.Escape(run.Error));
         }
     }
 
@@ -160,23 +160,23 @@ public sealed class ScheduleCommand : AsyncCommand<ScheduleCommand.Settings>
     {
         ScheduleManifest manifest;
         try { manifest = await LoadScheduleAsync(cwd, ct); }
-        catch (InvalidOperationException ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message); return false; }
+        catch (InvalidOperationException ex) { AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message)); return false; }
 
         var entry = manifest.Schedules.FirstOrDefault(s => s.Id == id);
         if (entry == null)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] Schedule '{0}' not found.", id);
+            AnsiConsole.MarkupLine("[red]✗[/] Schedule '{0}' not found.", Markup.Escape(id));
             return false;
         }
 
-        AnsiConsole.MarkupLine("Running schedule: [bold]{0}[/] ({1})...", entry.Name, entry.Id);
+        AnsiConsole.MarkupLine("Running schedule: [bold]{0}[/] ({1})...", Markup.Escape(entry.Name), Markup.Escape(entry.Id));
         var state = await LoadStateAsync(cwd, ct);
 
-        AnsiConsole.MarkupLine("[dim]{0}[/]", entry.Task?.Ref ?? "");
+        AnsiConsole.MarkupLine("[dim]{0}[/]", Markup.Escape(entry.Task?.Ref ?? ""));
 
         state.Runs[id] = new ScheduleRun(DateTimeOffset.UtcNow.ToString("O"), "success");
         await SaveStateAsync(cwd, state, ct);
-        AnsiConsole.MarkupLine("[green]✓[/] {0} completed.", entry.Name);
+        AnsiConsole.MarkupLine("[green]✓[/] {0} completed.", Markup.Escape(entry.Name));
         return true;
     }
 }

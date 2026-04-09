@@ -24,7 +24,7 @@ public sealed class InitRemoteCommand : AsyncCommand<InitRemoteCommand.Settings>
         }
         catch (InvalidOperationException ex)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message));
             return 1;
         }
         return 0;

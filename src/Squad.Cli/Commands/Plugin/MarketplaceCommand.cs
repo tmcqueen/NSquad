@@ -84,7 +84,7 @@ public sealed class MarketplaceAddCommand : AsyncCommand<MarketplaceAddCommand.S
         }
         var cwd = Directory.GetCurrentDirectory();
         await MarketplaceHelper.AddAsync(cwd, settings.Source, cancellationToken);
-        AnsiConsole.MarkupLine("[green]✓[/] Registered marketplace: [bold]{0}[/]", settings.Source);
+        AnsiConsole.MarkupLine("[green]✓[/] Registered marketplace: [bold]{0}[/]", Markup.Escape(settings.Source));
         return 0;
     }
 }
@@ -104,11 +104,11 @@ public sealed class MarketplaceRemoveCommand : AsyncCommand<MarketplaceRemoveCom
         try
         {
             await MarketplaceHelper.RemoveAsync(cwd, settings.Name, cancellationToken);
-            AnsiConsole.MarkupLine("[green]✓[/] Removed marketplace: [bold]{0}[/]", settings.Name);
+            AnsiConsole.MarkupLine("[green]✓[/] Removed marketplace: [bold]{0}[/]", Markup.Escape(settings.Name));
         }
         catch (InvalidOperationException ex)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[red]✗[/] {0}", Markup.Escape(ex.Message));
             return 1;
         }
         return 0;
@@ -129,7 +129,7 @@ public sealed class MarketplaceListCommand : AsyncCommand
         }
         AnsiConsole.MarkupLine("\n[bold]Registered marketplaces:[/]\n");
         foreach (var m in reg.Marketplaces)
-            AnsiConsole.MarkupLine("  [bold]{0}[/]  →  [dim]{1}[/]", m.Name, m.Source);
+            AnsiConsole.MarkupLine("  [bold]{0}[/]  →  [dim]{1}[/]", Markup.Escape(m.Name), Markup.Escape(m.Source));
         return 0;
     }
 }
@@ -151,7 +151,7 @@ public sealed class MarketplaceBrowseCommand : AsyncCommand<MarketplaceBrowseCom
         var mp = reg.Marketplaces.FirstOrDefault(m => m.Name == settings.Name);
         if (mp == null)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] Marketplace \"{0}\" not found.", settings.Name);
+            AnsiConsole.MarkupLine("[red]✗[/] Marketplace \"{0}\" not found.", Markup.Escape(settings.Name));
             return 1;
         }
 
@@ -173,14 +173,14 @@ public sealed class MarketplaceBrowseCommand : AsyncCommand<MarketplaceBrowseCom
 
         if (proc.ExitCode != 0)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] Could not browse {0}.", mp.Source);
+            AnsiConsole.MarkupLine("[red]✗[/] Could not browse {0}.", Markup.Escape(mp.Source));
             return 1;
         }
 
         var entries = JsonSerializer.Deserialize<List<string>>(output.Trim()) ?? new();
-        AnsiConsole.MarkupLine("\n[bold]Plugins in {0}[/] ({1}):\n", mp.Name, mp.Source);
+        AnsiConsole.MarkupLine("\n[bold]Plugins in {0}[/] ({1}):\n", Markup.Escape(mp.Name), Markup.Escape(mp.Source));
         foreach (var e in entries)
-            AnsiConsole.MarkupLine("  📦 {0}", e);
+            AnsiConsole.MarkupLine("  📦 {0}", Markup.Escape(e));
         return 0;
     }
 }

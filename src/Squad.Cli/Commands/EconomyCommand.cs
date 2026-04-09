@@ -45,7 +45,7 @@ public sealed class EconomyCommand : AsyncCommand<EconomyCommand.Settings>
                 if (!enabled) AnsiConsole.MarkupLine("  Usage: [bold]squad economy on | off[/]\n");
                 break;
             default:
-                AnsiConsole.MarkupLine("[red]✗[/] Unknown mode '{0}'. Use [bold]on[/] or [bold]off[/].", settings.Mode);
+                AnsiConsole.MarkupLine("[red]✗[/] Unknown mode '{0}'. Use [bold]on[/] or [bold]off[/].", Markup.Escape(settings.Mode));
                 return 1;
         }
         return 0;

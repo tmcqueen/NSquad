@@ -78,11 +78,11 @@ public sealed class PersonalInitCommand : AsyncCommand
         try
         {
             PersonalHelper.Init(personalDir);
-            AnsiConsole.MarkupLine("[green]✓[/] Personal squad initialized at [dim]{0}[/]", personalDir);
+            AnsiConsole.MarkupLine("[green]✓[/] Personal squad initialized at [dim]{0}[/]", Markup.Escape(personalDir));
         }
         catch (InvalidOperationException ex)
         {
-            AnsiConsole.MarkupLine("[yellow]⚠[/] {0}", ex.Message);
+            AnsiConsole.MarkupLine("[yellow]⚠[/] {0}", Markup.Escape(ex.Message));
         }
         return 0;
     }
