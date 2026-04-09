@@ -18,6 +18,10 @@ public static class SquadCliApp
             config.SetApplicationName("squad");
             config.SetApplicationVersion("0.2.0");
 
+            // init
+            config.AddCommand<InitCommand>("init")
+                  .WithDescription("Scaffold a new squad project (.squad/, squad.config.json, agent prompt).");
+
             // Plan 1 commands
             config.AddCommand<DoctorCommand>("doctor")
                   .WithDescription("Validate .squad/ setup and report health checks.");
