@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.29.0" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+    <ProjectReference Include="..\..\src\Squad.Cli\Squad.Cli.csproj" />
+    <ProjectReference Include="..\..\src\Squad.Sdk\Squad.Sdk.csproj" />
+  </ItemGroup>
+</Project>
