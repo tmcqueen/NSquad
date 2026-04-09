@@ -1,3 +1,4 @@
+using System.Text;
 using GitHub.Copilot.SDK;
 using Squad.Sdk.Events;
 
@@ -30,8 +31,8 @@ public sealed class SquadSession : IAsyncDisposable
     /// <summary>Send a message and return the full response when the session goes idle.</summary>
     public async Task<string> SendAsync(string prompt, CancellationToken ct = default)
     {
-        var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var response = new System.Text.StringBuilder();
+        TaskCompletionSource done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        StringBuilder response = new System.Text.StringBuilder();
 
         using var sub = _inner.On(evt =>
         {
@@ -65,7 +66,7 @@ public sealed class SquadSession : IAsyncDisposable
         Action<string> onDelta,
         CancellationToken ct = default)
     {
-        var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        TaskCompletionSource done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
         using var sub = _inner.On(evt =>
         {

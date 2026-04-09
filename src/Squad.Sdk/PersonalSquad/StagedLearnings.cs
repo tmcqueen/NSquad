@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Squad.Sdk.PersonalSquad;
 
 /// <summary>A single staged learning file loaded from <c>.squad/extract/</c>.</summary>
@@ -36,7 +38,7 @@ public static class StagedLearnings
         var decisionsPath = Path.Combine(personalSquadDir, "decisions.md");
         var existing = File.Exists(decisionsPath) ? await File.ReadAllTextAsync(decisionsPath, ct) : "# Decisions\n";
 
-        var newEntries = new System.Text.StringBuilder();
+        StringBuilder newEntries = new System.Text.StringBuilder();
         var count = 0;
         foreach (var l in learnings)
         {

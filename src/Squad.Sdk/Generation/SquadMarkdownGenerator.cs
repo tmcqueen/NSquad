@@ -1,3 +1,4 @@
+using System.Text;
 using Squad.Sdk.Config;
 
 namespace Squad.Sdk.Generation;
@@ -20,7 +21,7 @@ public static class SquadMarkdownGenerator
     /// <summary>Generate all .squad/ markdown files from the given config.</summary>
     public static IReadOnlyList<GeneratedFile> Build(SquadConfig config)
     {
-        var files = new List<GeneratedFile>();
+        List<GeneratedFile> files = new List<GeneratedFile>();
 
         files.Add(new(".squad/team.md", GenerateTeamMd(config)));
 
@@ -35,7 +36,7 @@ public static class SquadMarkdownGenerator
 
     private static string GenerateTeamMd(SquadConfig config)
     {
-        var sb = new System.Text.StringBuilder(GeneratedHeader);
+        StringBuilder sb = new System.Text.StringBuilder(GeneratedHeader);
         sb.AppendLine($"# Squad Team — {config.Team.Name}\n");
         if (!string.IsNullOrEmpty(config.Team.Description))
             sb.AppendLine($"> {config.Team.Description}\n");
@@ -55,7 +56,7 @@ public static class SquadMarkdownGenerator
     private static string GenerateRoutingMd(SquadConfig config)
     {
         var routing = config.Routing!;
-        var sb = new System.Text.StringBuilder(GeneratedHeader);
+        StringBuilder sb = new System.Text.StringBuilder(GeneratedHeader);
         sb.AppendLine($"# Routing Rules — {config.Team.Name}\n");
         if (routing.DefaultAgent != null)
             sb.AppendLine($"**Default agent:** {routing.DefaultAgent}\n");
@@ -72,7 +73,7 @@ public static class SquadMarkdownGenerator
 
     private static string GenerateCharterMd(AgentConfig agent, SquadConfig config)
     {
-        var sb = new System.Text.StringBuilder(GeneratedHeader);
+        StringBuilder sb = new System.Text.StringBuilder(GeneratedHeader);
         var name = CapitalizeName(agent.Name);
         var role = agent.Role ?? agent.Name;
         sb.AppendLine($"# {name} — {role}\n");

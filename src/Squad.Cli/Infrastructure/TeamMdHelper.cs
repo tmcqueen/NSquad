@@ -59,7 +59,7 @@ public static class TeamMdHelper
 
     public static string ReadTeamMd(string squadDir)
     {
-        var path = Path.Combine(squadDir, "team.md");
+        string path = Path.Combine(squadDir, "team.md");
         return File.Exists(path) ? File.ReadAllText(path) : "";
     }
 

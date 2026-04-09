@@ -21,8 +21,8 @@ public sealed class CostCommand : AsyncCommand<CostCommand.Settings>
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = settings.Dir ?? Directory.GetCurrentDirectory();
-        var squadDir = PathResolver.ResolveSquadDir(cwd);
+        string cwd = settings.Dir ?? Directory.GetCurrentDirectory();
+        string? squadDir = PathResolver.ResolveSquadDir(cwd);
 
         if (squadDir is null)
         {
@@ -67,9 +67,9 @@ public sealed class CostCommand : AsyncCommand<CostCommand.Settings>
                 $"[green]{FormatCost(s.TotalCost)}[/]");
         }
 
-        var totalInput = summary.Values.Sum(s => s.TotalInputTokens);
-        var totalOutput = summary.Values.Sum(s => s.TotalOutputTokens);
-        var totalCost = summary.Values.Sum(s => s.TotalCost);
+        int totalInput = summary.Values.Sum(s => s.TotalInputTokens);
+        int totalOutput = summary.Values.Sum(s => s.TotalOutputTokens);
+        decimal totalCost = summary.Values.Sum(s => s.TotalCost);
 
         table.AddEmptyRow();
         table.AddRow(

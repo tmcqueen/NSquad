@@ -32,8 +32,8 @@ public static class HistorySplitter
         if (string.IsNullOrEmpty(history)) return history;
 
         var lines = history.Split('\n');
-        var portable = new List<string>();
-        var projectLearnings = new List<string>();
+        List<string> portable = new List<string>();
+        List<string> projectLearnings = new List<string>();
         var inProjectSection = false;
 
         foreach (var line in lines)

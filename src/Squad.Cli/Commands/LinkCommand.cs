@@ -17,7 +17,7 @@ public sealed class LinkCommand : AsyncCommand<LinkCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         try
         {
             WriteRemoteConfig(cwd, settings.TeamRepoPath);
@@ -35,18 +35,18 @@ public sealed class LinkCommand : AsyncCommand<LinkCommand.Settings>
     /// <summary>Write .squad/config.json with teamRoot. Exposed for testing.</summary>
     public static void WriteRemoteConfig(string projectDir, string teamRepoPath)
     {
-        var absoluteTeam = Path.GetFullPath(Path.Combine(projectDir, teamRepoPath));
+        string absoluteTeam = Path.GetFullPath(Path.Combine(projectDir, teamRepoPath));
 
         if (!Directory.Exists(absoluteTeam))
             throw new InvalidOperationException($"Target path does not exist: {absoluteTeam}");
 
-        var hasSquad = Directory.Exists(Path.Combine(absoluteTeam, ".squad"));
-        var hasAiTeam = Directory.Exists(Path.Combine(absoluteTeam, ".ai-team"));
+        bool hasSquad = Directory.Exists(Path.Combine(absoluteTeam, ".squad"));
+        bool hasAiTeam = Directory.Exists(Path.Combine(absoluteTeam, ".ai-team"));
         if (!hasSquad && !hasAiTeam)
             throw new InvalidOperationException($"Target does not contain a .squad/ directory: {absoluteTeam}");
 
-        var squadDir = Path.Combine(projectDir, ".squad");
-        var relativePath = Path.GetRelativePath(projectDir, absoluteTeam);
+        string squadDir = Path.Combine(projectDir, ".squad");
+        string relativePath = Path.GetRelativePath(projectDir, absoluteTeam);
 
         var cfg = new LocalSquadConfig { TeamRoot = relativePath };
         cfg.Save(squadDir);
@@ -56,11 +56,11 @@ public sealed class LinkCommand : AsyncCommand<LinkCommand.Settings>
 
     private static void EnsureGitignoreEntry(string repoDir, string entry)
     {
-        var gitignorePath = Path.Combine(repoDir, ".gitignore");
-        var existing = File.Exists(gitignorePath) ? File.ReadAllText(gitignorePath) : "";
+        string gitignorePath = Path.Combine(repoDir, ".gitignore");
+        string existing = File.Exists(gitignorePath) ? File.ReadAllText(gitignorePath) : "";
         if (existing.Split('\n').Any(l => l.Trim() == entry)) return;
 
-        var nl = existing.Length > 0 && !existing.EndsWith('\n') ? "\n" : "";
+        string nl = existing.Length > 0 && !existing.EndsWith('\n') ? "\n" : "";
         File.AppendAllText(gitignorePath,
             nl + "# Squad: local config (machine-specific paths, never commit)\n" + entry + "\n");
     }

@@ -11,7 +11,7 @@ public static class CliServiceExtensions
     /// </summary>
     public static string RequireSquadDir(string? cwd = null)
     {
-        var dir = PathResolver.ResolveSquadDir(cwd ?? Directory.GetCurrentDirectory());
+        string? dir = PathResolver.ResolveSquadDir(cwd ?? Directory.GetCurrentDirectory());
         if (dir is null)
             throw new InvalidOperationException(
                 "No .squad/ directory found. Run from inside a repository that has been initialized with Squad.");

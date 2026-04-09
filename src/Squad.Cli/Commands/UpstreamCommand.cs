@@ -36,8 +36,8 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
-        var squadDir = PathResolver.ResolveSquadDir(cwd);
+        string cwd = Directory.GetCurrentDirectory();
+        string? squadDir = PathResolver.ResolveSquadDir(cwd);
         if (squadDir == null)
         {
             AnsiConsole.MarkupLine("[red]✗[/] No squad found.");
@@ -118,7 +118,7 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
         if (type == "export") return Path.GetFileNameWithoutExtension(source).Replace("squad-export", "upstream");
         if (type == "git")
         {
-            var trimmed = source.TrimEnd('/');
+            string trimmed = source.TrimEnd('/');
             if (trimmed.EndsWith(".git", StringComparison.OrdinalIgnoreCase))
                 trimmed = trimmed[..^4];
             return trimmed.Split('/').LastOrDefault() ?? "upstream";
@@ -128,12 +128,12 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
 
     public static async Task<UpstreamConfig> ReadConfigAsync(string cwd, CancellationToken ct = default)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
-        var path = Path.Combine(squadDir, "upstream.json");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string path = Path.Combine(squadDir, "upstream.json");
         if (!File.Exists(path)) return new UpstreamConfig();
         try
         {
-            var json = await File.ReadAllTextAsync(path, ct);
+            string json = await File.ReadAllTextAsync(path, ct);
             return JsonSerializer.Deserialize<UpstreamConfig>(json, _opts) ?? new UpstreamConfig();
         }
         catch { return new UpstreamConfig(); }
@@ -141,7 +141,7 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
 
     public static async Task WriteConfigAsync(string cwd, UpstreamConfig config, CancellationToken ct = default)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
         Directory.CreateDirectory(squadDir);
         await File.WriteAllTextAsync(Path.Combine(squadDir, "upstream.json"),
             JsonSerializer.Serialize(config, _opts) + "\n", ct);
@@ -150,8 +150,8 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
     public static async Task AddAsync(string cwd, string source, string? name = null,
         string? gitRef = null, CancellationToken ct = default)
     {
-        var type = DetectSourceType(source);
-        var derivedName = name ?? DeriveName(source, type);
+        string type = DetectSourceType(source);
+        string derivedName = name ?? DeriveName(source, type);
 
         if (!IsValidUpstreamName(derivedName))
             throw new InvalidOperationException($"Invalid upstream name \"{derivedName}\".");
@@ -182,8 +182,8 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
             throw new InvalidOperationException($"Upstream \"{name}\" not found.");
 
         // Clean up cached clone
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
-        var cloneDir = Path.Combine(squadDir, "_upstream_repos", name);
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string cloneDir = Path.Combine(squadDir, "_upstream_repos", name);
         if (Directory.Exists(cloneDir)) Directory.Delete(cloneDir, recursive: true);
 
         await WriteConfigAsync(cwd, config with { Upstreams = filtered }, ct);
@@ -200,8 +200,8 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
         AnsiConsole.MarkupLine("\n[bold]Configured upstreams:[/]\n");
         foreach (var u in config.Upstreams)
         {
-            var synced = u.LastSynced != null ? $"synced {u.LastSynced.Split('T')[0]}" : "never synced";
-            var refStr = u.Ref != null ? $" (ref: {u.Ref})" : "";
+            string synced = u.LastSynced != null ? $"synced {u.LastSynced.Split('T')[0]}" : "never synced";
+            string refStr = u.Ref != null ? $" (ref: {u.Ref})" : "";
             AnsiConsole.MarkupLine("  [bold]{0}[/]  →  {1}: {2}{3}  [dim]({4})[/]",
                 Markup.Escape(u.Name), Markup.Escape(u.Type), Markup.Escape(u.Source),
                 Markup.Escape(refStr), Markup.Escape(synced));
@@ -225,8 +225,8 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
         }
 
         AnsiConsole.MarkupLine("\nSyncing {0} upstream(s)...\n", toSync.Count);
-        var synced = 0;
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        int synced = 0;
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
 
         foreach (var upstream in toSync)
         {
@@ -238,8 +238,8 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
             }
             else if (upstream.Type == "git")
             {
-                var reposDir = Path.Combine(squadDir, "_upstream_repos");
-                var cloneDir = Path.Combine(reposDir, upstream.Name);
+                string reposDir = Path.Combine(squadDir, "_upstream_repos");
+                string cloneDir = Path.Combine(reposDir, upstream.Name);
                 Directory.CreateDirectory(reposDir);
 
                 var (cmd, args) = Directory.Exists(Path.Combine(cloneDir, ".git"))
@@ -251,7 +251,7 @@ public sealed class UpstreamCommand : AsyncCommand<UpstreamCommand.Settings>
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                 };
-                foreach (var a in args) psi.ArgumentList.Add(a);
+                foreach (string? a in args) psi.ArgumentList.Add(a);
                 using var proc = System.Diagnostics.Process.Start(psi);
                 await proc!.WaitForExitAsync(ct);
 

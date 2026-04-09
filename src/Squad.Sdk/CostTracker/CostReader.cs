@@ -19,7 +19,7 @@ public static class CostReader
         if (!Directory.Exists(costsDir))
             return [];
 
-        var entries = new List<CostEntry>();
+        List<CostEntry> entries = new List<CostEntry>();
         foreach (var file in Directory.GetFiles(costsDir, "*.json"))
         {
             try

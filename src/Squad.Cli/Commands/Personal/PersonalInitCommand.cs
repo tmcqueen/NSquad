@@ -15,13 +15,13 @@ public static class PersonalHelper
             throw new InvalidOperationException($"Personal squad already initialized at {personalDir}");
 
         Directory.CreateDirectory(Path.Combine(personalDir, "agents"));
-        var config = """{"defaultModel":"auto","ghostProtocol":true}""";
+        string config = """{"defaultModel":"auto","ghostProtocol":true}""";
         File.WriteAllText(Path.Combine(personalDir, "config.json"), config + "\n");
     }
 
     public static void AddAgent(string personalDir, string name, string role)
     {
-        var agentDir = Path.Combine(personalDir, "agents", name);
+        string agentDir = Path.Combine(personalDir, "agents", name);
         if (Directory.Exists(agentDir))
             throw new InvalidOperationException($"Agent '{name}' already exists.");
 
@@ -32,14 +32,14 @@ public static class PersonalHelper
 
     public static IReadOnlyList<string> ListAgents(string personalDir)
     {
-        var agentsDir = Path.Combine(personalDir, "agents");
+        string agentsDir = Path.Combine(personalDir, "agents");
         if (!Directory.Exists(agentsDir)) return Array.Empty<string>();
         return Directory.GetDirectories(agentsDir).Select(Path.GetFileName).ToList()!;
     }
 
     public static void RemoveAgent(string personalDir, string name)
     {
-        var agentDir = Path.Combine(personalDir, "agents", name);
+        string agentDir = Path.Combine(personalDir, "agents", name);
         if (!Directory.Exists(agentDir))
             throw new InvalidOperationException($"Agent '{name}' not found in personal squad.");
         Directory.Delete(agentDir, recursive: true);
@@ -73,8 +73,8 @@ public sealed class PersonalInitCommand : AsyncCommand
 {
     protected override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
-        var globalDir = PathResolver.ResolveGlobalSquadPath();
-        var personalDir = Path.Combine(globalDir, "personal-squad");
+        string globalDir = PathResolver.ResolveGlobalSquadPath();
+        string personalDir = Path.Combine(globalDir, "personal-squad");
         try
         {
             PersonalHelper.Init(personalDir);

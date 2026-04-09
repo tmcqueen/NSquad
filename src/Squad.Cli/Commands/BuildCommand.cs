@@ -22,11 +22,11 @@ public sealed class BuildCommand : AsyncCommand<BuildCommand.Settings>
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
 
         if (settings.Check)
         {
-            var hasDrift = await CheckDriftAsync(cwd, ct);
+            bool hasDrift = await CheckDriftAsync(cwd, ct);
             if (!hasDrift)
             {
                 AnsiConsole.MarkupLine("[green]✓[/] All generated files match disk — no drift.");
@@ -43,7 +43,7 @@ public sealed class BuildCommand : AsyncCommand<BuildCommand.Settings>
             AnsiConsole.MarkupLine("\n[bold]Dry run[/] — would generate {0} file(s):\n", files.Count);
             foreach (var f in files)
             {
-                var exists = File.Exists(Path.Combine(cwd, f.RelPath));
+                bool exists = File.Exists(Path.Combine(cwd, f.RelPath));
                 AnsiConsole.MarkupLine("  {0}  {1}",
                     exists ? "[yellow]overwrite[/]" : "[green]create[/]", Markup.Escape(f.RelPath));
             }

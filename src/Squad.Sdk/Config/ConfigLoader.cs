@@ -9,7 +9,7 @@ public static class ConfigLoader
     private static readonly JsonSerializerOptions _options = new()
     {
         PropertyNameCaseInsensitive = true,
-DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
     /// <summary>

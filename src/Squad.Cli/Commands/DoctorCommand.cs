@@ -19,7 +19,7 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
 
     protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = settings.Dir ?? Directory.GetCurrentDirectory();
+        string cwd = settings.Dir ?? Directory.GetCurrentDirectory();
         var mode = DetectMode(cwd);
         var checks = RunChecks(cwd);
 
@@ -52,9 +52,9 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
 
-        var passed = checks.Count(c => c.Status == CheckStatus.Pass);
-        var failed = checks.Count(c => c.Status == CheckStatus.Fail);
-        var warned = checks.Count(c => c.Status == CheckStatus.Warn);
+        int passed = checks.Count(c => c.Status == CheckStatus.Pass);
+        int failed = checks.Count(c => c.Status == CheckStatus.Fail);
+        int warned = checks.Count(c => c.Status == CheckStatus.Warn);
 
         AnsiConsole.MarkupLine(
             $"[bold]Summary:[/] [green]{passed} passed[/], [red]{failed} failed[/], [yellow]{warned} warnings[/]");
@@ -66,9 +66,9 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
     /// <summary>Run all health checks for the given working directory. Exposed for testing.</summary>
     public static IReadOnlyList<DoctorCheck> RunChecks(string cwd)
     {
-        var squadDir = Path.Combine(cwd, ".squad");
-        var legacyDir = Path.Combine(cwd, ".ai-team");
-        var effectiveDir = Directory.Exists(squadDir) ? squadDir
+        string squadDir = Path.Combine(cwd, ".squad");
+        string legacyDir = Path.Combine(cwd, ".ai-team");
+        string effectiveDir = Directory.Exists(squadDir) ? squadDir
             : Directory.Exists(legacyDir) ? legacyDir
             : squadDir;
 
@@ -83,7 +83,7 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
             return checks;
 
         // 2. config.json (optional — only check if present)
-        var configPath = Path.Combine(effectiveDir, "config.json");
+        string configPath = Path.Combine(effectiveDir, "config.json");
         if (File.Exists(configPath))
         {
             try
@@ -93,14 +93,14 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
 
                 if (doc.RootElement.TryGetProperty("teamRoot", out var teamRoot))
                 {
-                    var raw = teamRoot.GetString();
+                    string? raw = teamRoot.GetString();
                     if (raw is not null && Path.IsPathFullyQualified(raw))
                         checks.Add(new("absolute path warning", CheckStatus.Warn,
                             $"teamRoot is absolute ({raw}) — prefer relative paths for portability"));
 
                     if (raw is { Length: > 0 })
                     {
-                        var resolved = Path.IsPathFullyQualified(raw)
+                        string resolved = Path.IsPathFullyQualified(raw)
                             ? raw
                             : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(effectiveDir)!, raw));
                         checks.Add(Directory.Exists(resolved)
@@ -116,7 +116,7 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
         }
 
         // 3. team.md with ## Members
-        var teamMd = Path.Combine(effectiveDir, "team.md");
+        string teamMd = Path.Combine(effectiveDir, "team.md");
         if (!File.Exists(teamMd))
             checks.Add(new("team.md exists with ## Members", CheckStatus.Fail, "file not found"));
         else if (!File.ReadAllText(teamMd).Contains("## Members"))
@@ -130,20 +130,20 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
             : new("routing.md exists", CheckStatus.Fail, "file not found"));
 
         // 5. agents/ directory
-        var agentsDir = Path.Combine(effectiveDir, "agents");
+        string agentsDir = Path.Combine(effectiveDir, "agents");
         if (!Directory.Exists(agentsDir))
         {
             checks.Add(new("agents/ directory exists", CheckStatus.Fail, "directory not found"));
         }
         else
         {
-            var count = Directory.GetDirectories(agentsDir).Length;
+            int count = Directory.GetDirectories(agentsDir).Length;
             checks.Add(new("agents/ directory exists", CheckStatus.Pass,
                 $"directory present ({count} agent{(count == 1 ? "" : "s")})"));
         }
 
         // 6. casting/registry.json
-        var registryPath = Path.Combine(effectiveDir, "casting", "registry.json");
+        string registryPath = Path.Combine(effectiveDir, "casting", "registry.json");
         if (!File.Exists(registryPath))
         {
             checks.Add(new("casting/registry.json exists", CheckStatus.Fail, "file not found"));
@@ -176,7 +176,7 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
         try
         {
             var result = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("gh", "--version")
-                { RedirectStandardOutput = true, UseShellExecute = false });
+            { RedirectStandardOutput = true, UseShellExecute = false });
             result?.WaitForExit(2000);
             checks.Add(new("GitHub CLI (gh) available", CheckStatus.Pass, "gh found in PATH"));
         }
@@ -194,7 +194,7 @@ public sealed class DoctorCommand : AsyncCommand<DoctorCommand.Settings>
         if (File.Exists(Path.Combine(cwd, "squad-hub.json")))
             return SquadDoctorMode.Hub;
 
-        var configPath = Path.Combine(cwd, ".squad", "config.json");
+        string configPath = Path.Combine(cwd, ".squad", "config.json");
         if (!File.Exists(configPath))
             return SquadDoctorMode.Local;
 

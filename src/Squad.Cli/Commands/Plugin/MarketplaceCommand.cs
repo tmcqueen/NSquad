@@ -17,17 +17,17 @@ public static class MarketplaceHelper
 
     private static string RegistryPath(string cwd)
     {
-        var squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
+        string squadDir = PathResolver.ResolveSquadDir(cwd) ?? Path.Combine(cwd, ".squad");
         return Path.Combine(squadDir, "plugins", "marketplaces.json");
     }
 
     public static async Task<MarketplacesRegistry> ReadAsync(string cwd, CancellationToken ct = default)
     {
-        var path = RegistryPath(cwd);
+        string path = RegistryPath(cwd);
         if (!File.Exists(path)) return new MarketplacesRegistry();
         try
         {
-            var json = await File.ReadAllTextAsync(path, ct);
+            string json = await File.ReadAllTextAsync(path, ct);
             return JsonSerializer.Deserialize<MarketplacesRegistry>(json, _opts) ?? new MarketplacesRegistry();
         }
         catch { return new MarketplacesRegistry(); }
@@ -35,7 +35,7 @@ public static class MarketplaceHelper
 
     public static async Task WriteAsync(string cwd, MarketplacesRegistry reg, CancellationToken ct = default)
     {
-        var path = RegistryPath(cwd);
+        string path = RegistryPath(cwd);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         await File.WriteAllTextAsync(path, JsonSerializer.Serialize(reg, _opts) + "\n", ct);
     }
@@ -45,7 +45,7 @@ public static class MarketplaceHelper
         var reg = await ReadAsync(cwd, ct);
         if (reg.Marketplaces.Any(m => m.Source == source)) return; // idempotent
 
-        var name = source.Split('/').Last();
+        string name = source.Split('/').Last();
         var updated = reg with
         {
             Marketplaces = reg.Marketplaces
@@ -82,7 +82,7 @@ public sealed class MarketplaceAddCommand : AsyncCommand<MarketplaceAddCommand.S
             AnsiConsole.MarkupLine("[red]✗[/] Source must be in [bold]owner/repo[/] format.");
             return 1;
         }
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         await MarketplaceHelper.AddAsync(cwd, settings.Source, cancellationToken);
         AnsiConsole.MarkupLine("[green]✓[/] Registered marketplace: [bold]{0}[/]", Markup.Escape(settings.Source));
         return 0;
@@ -100,7 +100,7 @@ public sealed class MarketplaceRemoveCommand : AsyncCommand<MarketplaceRemoveCom
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         try
         {
             await MarketplaceHelper.RemoveAsync(cwd, settings.Name, cancellationToken);
@@ -119,7 +119,7 @@ public sealed class MarketplaceListCommand : AsyncCommand
 {
     protected override async Task<int> ExecuteAsync(CommandContext context, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         var reg = await MarketplaceHelper.ReadAsync(cwd, cancellationToken);
         if (reg.Marketplaces.Count == 0)
         {
@@ -146,7 +146,7 @@ public sealed class MarketplaceBrowseCommand : AsyncCommand<MarketplaceBrowseCom
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
-        var cwd = Directory.GetCurrentDirectory();
+        string cwd = Directory.GetCurrentDirectory();
         var reg = await MarketplaceHelper.ReadAsync(cwd, cancellationToken);
         var mp = reg.Marketplaces.FirstOrDefault(m => m.Name == settings.Name);
         if (mp == null)
@@ -168,7 +168,7 @@ public sealed class MarketplaceBrowseCommand : AsyncCommand<MarketplaceBrowseCom
             AnsiConsole.MarkupLine("[red]✗[/] gh CLI not found.");
             return 1;
         }
-        var output = await proc.StandardOutput.ReadToEndAsync(cancellationToken);
+        string output = await proc.StandardOutput.ReadToEndAsync(cancellationToken);
         await proc.WaitForExitAsync(cancellationToken);
 
         if (proc.ExitCode != 0)
@@ -179,7 +179,7 @@ public sealed class MarketplaceBrowseCommand : AsyncCommand<MarketplaceBrowseCom
 
         var entries = JsonSerializer.Deserialize<List<string>>(output.Trim()) ?? new();
         AnsiConsole.MarkupLine("\n[bold]Plugins in {0}[/] ({1}):\n", Markup.Escape(mp.Name), Markup.Escape(mp.Source));
-        foreach (var e in entries)
+        foreach (string e in entries)
             AnsiConsole.MarkupLine("  📦 {0}", Markup.Escape(e));
         return 0;
     }
