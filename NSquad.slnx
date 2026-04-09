@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Squad.Cli/Squad.Cli.csproj" />
     <Project Path="src/Squad.Sdk/Squad.Sdk.csproj" />
+    <Project Path="src/Squad.TUI/Squad.TUI.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Squad.Cli.Tests/Squad.Cli.Tests.csproj" />

@@ -16,7 +16,7 @@ public static class SquadCliApp
         app.Configure(config =>
         {
             config.SetApplicationName("squad");
-            config.SetApplicationVersion("0.2.0");
+            config.SetApplicationVersion("0.3.0");
 
             // init
             config.AddCommand<InitCommand>("init")

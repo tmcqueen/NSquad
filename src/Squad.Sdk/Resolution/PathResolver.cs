@@ -14,6 +14,7 @@ public enum SquadMode
     Hub,
 }
 
+/// <summary>Resolves .squad/ directory paths and detects squad operating modes.</summary>
 public static class PathResolver
 {
     private static readonly string[] SquadDirNames = [".squad", ".ai-team"];

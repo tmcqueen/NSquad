@@ -1,17 +1,12 @@
 namespace Squad.Sdk.Roles;
 
 /// <summary>A single built-in agent role definition.</summary>
-public sealed record RoleDefinition(
-    /// <summary>Unique slug identifier (e.g. <c>lead</c>, <c>frontend</c>).</summary>
-    string Id,
-    /// <summary>Human-readable display title (e.g. <c>Lead / Architect</c>).</summary>
-    string Title,
-    /// <summary>One-line personality or work-style description for the role.</summary>
-    string Vibe,
-    /// <summary>Category grouping (e.g. <c>engineering</c>, <c>quality</c>, <c>design</c>).</summary>
-    string Category,
-    /// <summary>Emoji representing the role in UI contexts.</summary>
-    string Emoji);
+/// <param name="Id">Unique slug identifier (e.g. <c>lead</c>, <c>frontend</c>).</param>
+/// <param name="Title">Human-readable display title (e.g. <c>Lead / Architect</c>).</param>
+/// <param name="Vibe">One-line personality or work-style description for the role.</param>
+/// <param name="Category">Category grouping (e.g. <c>engineering</c>, <c>quality</c>, <c>design</c>).</param>
+/// <param name="Emoji">Emoji representing the role in UI contexts.</param>
+public sealed record RoleDefinition(string Id, string Title, string Vibe, string Category, string Emoji);
 
 /// <summary>
 /// Embedded built-in role catalog (20 roles).

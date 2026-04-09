@@ -23,9 +23,8 @@ public sealed record UpstreamSource
 }
 
 /// <summary>Registry of all configured upstream squad sources, persisted to .squad/upstream.json.</summary>
-public sealed record UpstreamConfig(
-    /// <summary>Ordered list of upstream sources.</summary>
-    List<UpstreamSource> Upstreams)
+/// <param name="Upstreams">Ordered list of upstream sources.</param>
+public sealed record UpstreamConfig(List<UpstreamSource> Upstreams)
 {
     /// <summary>Create an empty config.</summary>
     public UpstreamConfig() : this(new List<UpstreamSource>()) { }
