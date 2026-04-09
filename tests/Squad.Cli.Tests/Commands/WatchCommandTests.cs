@@ -44,7 +44,7 @@ public class WatchCommandTests
     [Test]
     public void FormatBoardLine_returns_string_for_positive_count()
     {
-        WatchCommand.FormatBoardLine("Untriaged", 3).ShouldContain("3");
+        WatchCommand.FormatBoardLine("Untriaged", 3)?.ShouldContain("3");
     }
 
     [Test]

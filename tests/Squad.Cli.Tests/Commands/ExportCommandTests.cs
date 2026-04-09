@@ -34,7 +34,7 @@ public class ExportCommandTests
     {
         var manifest = await ExportCommand.BuildManifestAsync(_tempDir);
         manifest.Agents.ShouldContainKey("builder");
-        manifest.Agents["builder"].Charter.ShouldContain("Builder");
+        manifest.Agents["builder"].Charter?.ShouldContain("Builder");
     }
 
     [Test]

@@ -151,7 +151,7 @@ public sealed class ExtractCommand : AsyncCommand<ExtractCommand.Settings>
     {
         AnsiConsole.MarkupLine("[bold]{0} learning(s) staged:[/]\n", learnings.Count);
         for (int i = 0; i < learnings.Count; i++)
-            AnsiConsole.MarkupLine("  [{0}] {1}. {2}: \"{3}\"",
+            AnsiConsole.MarkupLine("  [[{0}]] {1}. {2}: \"{3}\"",
                 "✓", i + 1, Markup.Escape(learnings[i].Filename), Markup.Escape(FormatLearningPreview(learnings[i].Content)));
 
         AnsiConsole.Write("\nAccept all? [Y/n] ");

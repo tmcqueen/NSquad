@@ -95,15 +95,20 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
                     if (ok)
                     {
                         triaged++;
-                        AnsiConsole.MarkupLine("[green]✓[/] [{0}] Triaged #{1} \"{2}\" → {3}",
-                            timestamp, issue.Number, Markup.Escape(issue.Title), Markup.Escape(result.Agent.Name));
+                        AnsiConsole.MarkupLine("[green]✓[/] [[{0}]] Triaged #{1} \"{2}\" → {3}",
+                            Markup.Escape(timestamp), 
+                            Markup.Escape(issue.Number.ToString()), 
+                            Markup.Escape(issue.Title), 
+                            Markup.Escape(result.Agent.Name));
                     }
                 }
             }
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] [{0}] Check failed: {1}", timestamp, Markup.Escape(ex.Message));
+            AnsiConsole.MarkupLine("[red]✗[/] [[{0}]] Check failed: {1}", 
+                Markup.Escape(timestamp), 
+                Markup.Escape(ex.Message));
         }
 
         var lines = new[]
@@ -115,11 +120,12 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
 
         if (lines.Count > 0)
         {
-            AnsiConsole.MarkupLine("\n[bold]Round {0}[/]", round);
+            AnsiConsole.MarkupLine("\n[bold]Round {0}[/]", Markup.Escape(round.ToString()));
             foreach (var l in lines) AnsiConsole.MarkupLine(Markup.Escape(l!));
         }
         else
-            AnsiConsole.MarkupLine("[dim][{0}] Board is clear — Ralph is idling.[/]", timestamp);
+            AnsiConsole.MarkupLine("[dim blue][[{0}]] Board is clear — Ralph is idling.[/]", 
+                Markup.Escape(timestamp));
     }
 
     private sealed record GhIssue(int Number, string Title, IReadOnlyList<string> Labels);
