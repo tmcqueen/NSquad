@@ -57,9 +57,17 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
             }
             if (!settings.DryRun)
             {
-                var result = await BuildCommand.BuildAsync(cwd, ct);
-                AnsiConsole.MarkupLine("[green]✓[/] Generated {0} markdown file(s) from squad.config.json.", result.Written);
-                AnsiConsole.MarkupLine("[dim].squad/ is now up to date.[/]");
+                try
+                {
+                    var result = await BuildCommand.BuildAsync(cwd, ct);
+                    AnsiConsole.MarkupLine("[green]✓[/] Generated {0} markdown file(s) from squad.config.json.", result.Written);
+                    AnsiConsole.MarkupLine("[dim].squad/ is now up to date.[/]");
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine("[red]✗[/] Build failed: {0}", Markup.Escape(ex.Message));
+                    return 1;
+                }
             }
             else
                 AnsiConsole.MarkupLine("[dim][DRY RUN][/] Would run squad build to generate .squad/ markdown.");
@@ -73,7 +81,13 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
             if (mode == "legacy") { AnsiConsole.MarkupLine("[red]✗[/] Run [bold]squad migrate --from ai-team[/] first."); return 1; }
             if (mode == "sdk") { AnsiConsole.MarkupLine("[red]✗[/] Already in SDK mode (squad.config.json exists)."); return 1; }
 
-            var json = GenerateConfigJson(cwd);
+            string json;
+            try { json = GenerateConfigJson(cwd); }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine("[red]✗[/] Migration failed: {0}", Markup.Escape(ex.Message));
+                return 1;
+            }
             if (settings.DryRun)
             {
                 AnsiConsole.MarkupLine("[dim][DRY RUN][/] Generated squad.config.json:\n");
@@ -163,7 +177,7 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
         if (!File.Exists(path)) return "untitled-squad";
         foreach (var line in File.ReadAllLines(path))
         {
-            var m = Regex.Match(line, @"# Squad Team — (.+)");
+            var m = Regex.Match(line, @"^# Squad Team — (.+)");
             if (m.Success) return m.Groups[1].Value.Trim();
         }
         return "untitled-squad";
@@ -182,7 +196,7 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
             if (inMembers && line.StartsWith('|') && !line.Contains("---") && !line.Contains("Name"))
             {
                 var cells = line.Split('|').Select(s => s.Trim()).Where(s => s.Length > 0).ToArray();
-                if (cells.Length >= 1 && (cells.Length < 4 || cells[3].Contains("Active")))
+                if (cells.Length >= 4 && cells[3].Contains("Active"))
                     members.Add(cells[0].ToLowerInvariant());
             }
         }
@@ -194,7 +208,7 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
         var charterPath = Path.Combine(squadDir, "agents", agentName, "charter.md");
         if (!File.Exists(charterPath)) return agentName;
         var first = File.ReadAllLines(charterPath).FirstOrDefault(l => l.StartsWith("# ")) ?? "";
-        var m = Regex.Match(first, @"# \w+ — (.+)");
+        var m = Regex.Match(first, @"^# \w+ — (.+)");
         return m.Success ? m.Groups[1].Value.Trim() : agentName;
     }
 

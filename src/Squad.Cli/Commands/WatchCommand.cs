@@ -96,14 +96,14 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
                     {
                         triaged++;
                         AnsiConsole.MarkupLine("[green]✓[/] [{0}] Triaged #{1} \"{2}\" → {3}",
-                            timestamp, issue.Number, issue.Title, result.Agent.Name);
+                            timestamp, issue.Number, Markup.Escape(issue.Title), result.Agent.Name);
                     }
                 }
             }
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
         {
-            AnsiConsole.MarkupLine("[red]✗[/] [{0}] Check failed: {1}", timestamp, ex.Message);
+            AnsiConsole.MarkupLine("[red]✗[/] [{0}] Check failed: {1}", timestamp, Markup.Escape(ex.Message));
         }
 
         var lines = new[]
