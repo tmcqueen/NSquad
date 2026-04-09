@@ -128,6 +128,9 @@ public sealed class MigrateCommand : AsyncCommand<MigrateCommand.Settings>
     {
         var src = Path.Combine(cwd, ".ai-team");
         var dst = Path.Combine(cwd, ".squad");
+        if (Directory.Exists(dst))
+            throw new InvalidOperationException(
+                ".squad/ already exists. Remove it manually before migrating from .ai-team/.");
         Directory.Move(src, dst);
     }
 
