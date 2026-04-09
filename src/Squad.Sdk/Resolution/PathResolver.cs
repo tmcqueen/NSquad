@@ -45,8 +45,8 @@ public static class PathResolver
     /// </summary>
     public static SquadMode DetectMode(string squadDir)
     {
-        var hubFile = Path.Combine(Path.GetDirectoryName(squadDir)!, "squad-hub.json");
-        if (File.Exists(hubFile))
+        var parentDir = Path.GetDirectoryName(squadDir);
+        if (parentDir is not null && File.Exists(Path.Combine(parentDir, "squad-hub.json")))
             return SquadMode.Hub;
 
         var configPath = Path.Combine(squadDir, "config.json");
@@ -67,11 +67,9 @@ public static class PathResolver
     }
 
     /// <summary>
-    /// Platform-specific global squad config directory.
-    /// Windows: %APPDATA%/squad/   macOS: ~/Library/Application Support/squad/
-    /// Linux: $XDG_CONFIG_HOME/squad/ (default ~/.config/squad/)
+    /// Calculate the platform-specific global squad config path without creating it.
     /// </summary>
-    public static string ResolveGlobalSquadPath()
+    public static string GetGlobalSquadPath()
     {
         string base_;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -83,7 +81,20 @@ public static class PathResolver
             base_ = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME")
                     ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
 
-        var globalDir = Path.Combine(base_, "squad");
+        return Path.Combine(base_, "squad");
+    }
+
+    /// <summary>
+    /// Platform-specific global squad config directory.
+    /// Windows: %APPDATA%/squad/   macOS: ~/Library/Application Support/squad/
+    /// Linux: $XDG_CONFIG_HOME/squad/ (default ~/.config/squad/)
+    /// </summary>
+    /// <summary>
+    /// Return the global squad config directory, creating it if it does not exist.
+    /// </summary>
+    public static string ResolveGlobalSquadPath()
+    {
+        var globalDir = GetGlobalSquadPath();
         Directory.CreateDirectory(globalDir);
         return globalDir;
     }
@@ -97,7 +108,7 @@ public static class PathResolver
         if (Environment.GetEnvironmentVariable("SQUAD_NO_PERSONAL") is not null)
             return null;
 
-        var personalDir = Path.Combine(ResolveGlobalSquadPath(), "personal-squad");
+        var personalDir = Path.Combine(GetGlobalSquadPath(), "personal-squad");
         return Directory.Exists(personalDir) ? personalDir : null;
     }
 }

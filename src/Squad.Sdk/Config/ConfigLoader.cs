@@ -8,8 +8,7 @@ public static class ConfigLoader
     private static readonly JsonSerializerOptions _options = new()
     {
         PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
     /// <summary>
@@ -51,9 +50,18 @@ public static class ConfigLoader
         if (!File.Exists(path))
             return null;
 
+        string json;
         try
         {
-            var json = File.ReadAllText(path);
+            json = File.ReadAllText(path);
+        }
+        catch (IOException ex)
+        {
+            throw new ConfigLoadException($"Could not read {path}", ex);
+        }
+
+        try
+        {
             return JsonSerializer.Deserialize<SquadConfig>(json, _options);
         }
         catch (JsonException ex)

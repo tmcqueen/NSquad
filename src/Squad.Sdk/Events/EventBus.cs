@@ -35,7 +35,8 @@ public sealed class EventBus : IDisposable
         foreach (var handler in snapshot)
         {
             try { await handler(evt); }
-            catch { /* isolate faulting subscribers */ }
+            catch (OperationCanceledException) { throw; }
+            catch (Exception) { /* isolate faulting subscribers */ }
         }
     }
 
