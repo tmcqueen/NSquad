@@ -3,7 +3,16 @@ using System.Text.Json;
 
 namespace Squad.Sdk.Resolution;
 
-public enum SquadMode { Local, Remote, Hub }
+/// <summary>Describes how a squad directory is configured.</summary>
+public enum SquadMode
+{
+    /// <summary>Standalone local squad with no remote team root.</summary>
+    Local,
+    /// <summary>Squad connected to a remote team root via config.json.</summary>
+    Remote,
+    /// <summary>Hub mode — a squad-hub.json exists in the parent directory.</summary>
+    Hub,
+}
 
 public static class PathResolver
 {

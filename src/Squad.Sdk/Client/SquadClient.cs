@@ -84,12 +84,15 @@ public sealed class SquadClient : IAsyncDisposable
         return new SquadSession(inner, agentName, _eventBus);
     }
 
+    /// <summary>List all active sessions known to the underlying Copilot client.</summary>
     public async Task<IReadOnlyList<SessionMetadata>> ListSessionsAsync(CancellationToken ct = default)
         => await _inner.ListSessionsAsync(null, ct);
 
+    /// <summary>Delete a session by ID from the underlying Copilot client.</summary>
     public async Task DeleteSessionAsync(string sessionId, CancellationToken ct = default)
         => await _inner.DeleteSessionAsync(sessionId, ct);
 
+    /// <summary>Stop the underlying Copilot client process and release all resources.</summary>
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) == 1) return;

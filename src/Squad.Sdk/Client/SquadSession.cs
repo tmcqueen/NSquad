@@ -12,7 +12,9 @@ public sealed class SquadSession : IAsyncDisposable
     private readonly CopilotSession _inner;
     private readonly EventBus? _eventBus;
 
+    /// <summary>Unique identifier for this session.</summary>
     public string SessionId { get; }
+    /// <summary>Agent name associated with this session, or null if unspecified.</summary>
     public string? AgentName { get; }
 
     internal SquadSession(CopilotSession inner, string? agentName, EventBus? eventBus = null)
@@ -92,8 +94,10 @@ public sealed class SquadSession : IAsyncDisposable
     /// <summary>Subscribe directly to the underlying CopilotSession events.</summary>
     public IDisposable OnEvent(Action<SessionEvent> handler) => _inner.On(new SessionEventHandler(handler));
 
+    /// <summary>Abort the current in-progress request for this session.</summary>
     public async Task AbortAsync() => await _inner.AbortAsync();
 
+    /// <summary>Publish a <see cref="SessionDestroyedEvent"/> and dispose the underlying session.</summary>
     public async ValueTask DisposeAsync()
     {
         if (_eventBus is not null)
@@ -124,4 +128,5 @@ public sealed class SquadSession : IAsyncDisposable
     }
 }
 
+/// <summary>Thrown when a <see cref="SquadSession"/> encounters a session error event from the server.</summary>
 public sealed class SquadSessionException(string message) : Exception(message);

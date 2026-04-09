@@ -14,6 +14,7 @@ public sealed class SquadCoordinator
     private readonly EventBus _eventBus;
     private readonly RoutingEngine _router;
 
+    /// <summary>Initialise the coordinator with its squad config and event bus.</summary>
     public SquadCoordinator(SquadConfig config, EventBus eventBus)
     {
         _config = config;

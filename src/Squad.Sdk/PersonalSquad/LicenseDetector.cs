@@ -2,7 +2,12 @@ using System.Text.RegularExpressions;
 
 namespace Squad.Sdk.PersonalSquad;
 
-public sealed record LicenseInfo(string Type, string? SpdxId = null);
+/// <summary>The result of a license detection pass on a LICENSE file.</summary>
+public sealed record LicenseInfo(
+    /// <summary>License classification: <c>permissive</c>, <c>copyleft</c>, or <c>unknown</c>.</summary>
+    string Type,
+    /// <summary>SPDX identifier (e.g. <c>MIT</c>, <c>Apache-2.0</c>, <c>GPL-3.0</c>), or null if unrecognised.</summary>
+    string? SpdxId = null);
 
 /// <summary>
 /// Detects license type from LICENSE file content.
@@ -10,6 +15,7 @@ public sealed record LicenseInfo(string Type, string? SpdxId = null);
 /// </summary>
 public static class LicenseDetector
 {
+    /// <summary>Detect the license type and SPDX identifier from raw LICENSE file text.</summary>
     public static LicenseInfo Detect(string content)
     {
         if (string.IsNullOrWhiteSpace(content)) return new("unknown");

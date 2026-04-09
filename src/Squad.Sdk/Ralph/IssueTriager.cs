@@ -2,10 +2,30 @@ using System.Text.RegularExpressions;
 
 namespace Squad.Sdk.Ralph;
 
-public sealed record RosterMember(string Name, string Label, string Role);
-public sealed record TriageResult(RosterMember Agent, string Reason);
-public sealed record IssueRoutingRule(string Pattern, string AgentName);
+/// <summary>An active agent entry parsed from the <c>## Members</c> table in team.md.</summary>
+public sealed record RosterMember(
+    /// <summary>Lowercased agent name.</summary>
+    string Name,
+    /// <summary>GitHub label used to assign this agent (e.g. <c>squad:alice</c>).</summary>
+    string Label,
+    /// <summary>Human-readable role from the Members table.</summary>
+    string Role);
 
+/// <summary>The outcome of triaging an issue against routing rules and the roster.</summary>
+public sealed record TriageResult(
+    /// <summary>The roster member assigned to handle the issue.</summary>
+    RosterMember Agent,
+    /// <summary>Human-readable explanation of why this agent was selected.</summary>
+    string Reason);
+
+/// <summary>A regex-based routing rule that maps issue text to an agent name.</summary>
+public sealed record IssueRoutingRule(
+    /// <summary>Regex pattern tested case-insensitively against the issue title and body.</summary>
+    string Pattern,
+    /// <summary>Name of the agent to assign when this pattern matches.</summary>
+    string AgentName);
+
+/// <summary>Triages GitHub issues to squad agents based on routing rules and roster membership.</summary>
 public static class IssueTriager
 {
     /// <summary>

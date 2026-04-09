@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Squad.Sdk.Config;
 
+/// <summary>Loads squad.config.json from disk.</summary>
 public static class ConfigLoader
 {
     private static readonly JsonSerializerOptions _options = new()
@@ -71,8 +72,10 @@ DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     }
 }
 
+/// <summary>Thrown when squad.config.json cannot be read or parsed.</summary>
 public sealed class ConfigLoadException : Exception
 {
+    /// <summary>Create a <see cref="ConfigLoadException"/> with the given message and optional inner exception.</summary>
     public ConfigLoadException(string message, Exception? inner = null)
         : base(message, inner) { }
 }

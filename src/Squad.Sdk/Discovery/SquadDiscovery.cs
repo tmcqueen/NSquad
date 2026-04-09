@@ -3,10 +3,30 @@ using Squad.Sdk.Config;
 
 namespace Squad.Sdk.Discovery;
 
-public sealed record SquadContact(string Repo, List<string> Labels);
-public sealed record SquadManifest(string Name, List<string> Accepts, SquadContact Contact);
-public sealed record DiscoveredSquad(string SquadDir, SquadManifest Manifest);
+/// <summary>GitHub contact info for a discovered squad.</summary>
+public sealed record SquadContact(
+    /// <summary>GitHub owner/repo slug for the squad's repository.</summary>
+    string Repo,
+    /// <summary>Labels used to route work to this squad.</summary>
+    List<string> Labels);
 
+/// <summary>Manifest describing what a squad accepts and how to contact it.</summary>
+public sealed record SquadManifest(
+    /// <summary>Human-readable squad name.</summary>
+    string Name,
+    /// <summary>Work types or domains this squad accepts.</summary>
+    List<string> Accepts,
+    /// <summary>GitHub contact information for this squad.</summary>
+    SquadContact Contact);
+
+/// <summary>A squad discovered from a local upstream source.</summary>
+public sealed record DiscoveredSquad(
+    /// <summary>Absolute path to the discovered squad's .squad directory.</summary>
+    string SquadDir,
+    /// <summary>Parsed manifest from that squad's squad.manifest.json.</summary>
+    SquadManifest Manifest);
+
+/// <summary>Discovers squads registered as local upstreams.</summary>
 public static class SquadDiscovery
 {
     private static readonly JsonSerializerOptions _opts = new()
@@ -50,6 +70,7 @@ public static class SquadDiscovery
         return discovered;
     }
 
+    /// <summary>Format a list of discovered squads as a human-readable text table.</summary>
     public static string FormatTable(IReadOnlyList<DiscoveredSquad> squads)
     {
         if (squads.Count == 0) return "No squads discovered.";

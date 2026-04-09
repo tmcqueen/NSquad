@@ -5,6 +5,7 @@ using Squad.Sdk.Events;
 
 namespace Squad.Sdk;
 
+/// <summary>Extension methods for registering Squad SDK services with the DI container.</summary>
 public static class SquadSdkServiceExtensions
 {
     /// <summary>

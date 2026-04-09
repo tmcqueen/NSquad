@@ -1,10 +1,16 @@
 namespace Squad.Sdk.Roles;
 
+/// <summary>A single built-in agent role definition.</summary>
 public sealed record RoleDefinition(
+    /// <summary>Unique slug identifier (e.g. <c>lead</c>, <c>frontend</c>).</summary>
     string Id,
+    /// <summary>Human-readable display title (e.g. <c>Lead / Architect</c>).</summary>
     string Title,
+    /// <summary>One-line personality or work-style description for the role.</summary>
     string Vibe,
+    /// <summary>Category grouping (e.g. <c>engineering</c>, <c>quality</c>, <c>design</c>).</summary>
     string Category,
+    /// <summary>Emoji representing the role in UI contexts.</summary>
     string Emoji);
 
 /// <summary>
@@ -13,6 +19,7 @@ public sealed record RoleDefinition(
 /// </summary>
 public static class BuiltinRoles
 {
+    /// <summary>All 20 built-in role definitions.</summary>
     public static readonly IReadOnlyList<RoleDefinition> All = new List<RoleDefinition>
     {
         // Engineering
@@ -49,6 +56,7 @@ public static class BuiltinRoles
         new("compliance-legal", "Compliance & Legal", "Ensures you ship safely and legally — compliance is a feature.", "compliance", "⚖️"),
     };
 
+    /// <summary>Filter roles by optional category and/or search term (matched against id, title, and vibe).</summary>
     public static IReadOnlyList<RoleDefinition> Filter(string? category = null, string? search = null)
     {
         var roles = All.AsEnumerable();
@@ -63,6 +71,7 @@ public static class BuiltinRoles
         return roles.ToList();
     }
 
+    /// <summary>Distinct sorted list of all category names present in <see cref="All"/>.</summary>
     public static IReadOnlyList<string> Categories =>
         All.Select(r => r.Category).Distinct().Order().ToList();
 }

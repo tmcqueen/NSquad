@@ -11,6 +11,7 @@ public sealed class RoutingEngine
 {
     private readonly IReadOnlyList<(Regex Pattern, string Agent)> _compiled;
 
+    /// <summary>Compile the given routing rules into fast regex matchers.</summary>
     public RoutingEngine(IEnumerable<RoutingRule> rules)
     {
         _compiled = rules

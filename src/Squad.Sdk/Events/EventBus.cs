@@ -40,6 +40,7 @@ public sealed class EventBus : IDisposable
         }
     }
 
+    /// <summary>Clear all subscribers and mark the bus as disposed.</summary>
     public void Dispose()
     {
         if (_disposed) return;

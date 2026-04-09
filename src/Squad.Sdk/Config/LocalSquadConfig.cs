@@ -8,10 +8,14 @@ namespace Squad.Sdk.Config;
 /// </summary>
 public sealed record LocalSquadConfig
 {
+    /// <summary>Config schema version.</summary>
     public int Version { get; init; } = 1;
+    /// <summary>Path to the shared team root (remote mode only).</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? TeamRoot { get; init; }
+    /// <summary>When true, prefer economy-tier models to reduce cost.</summary>
     public bool EconomyMode { get; init; }
+    /// <summary>Optional project identifier for multi-project squads.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? ProjectKey { get; init; }
 
@@ -22,6 +26,7 @@ public sealed record LocalSquadConfig
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
+    /// <summary>Load from .squad/config.json, returning defaults if the file is absent or unreadable.</summary>
     public static LocalSquadConfig Load(string squadDir)
     {
         var path = Path.Combine(squadDir, "config.json");
@@ -41,6 +46,7 @@ public sealed record LocalSquadConfig
         }
     }
 
+    /// <summary>Persist this config to .squad/config.json, creating the directory if needed.</summary>
     public void Save(string squadDir)
     {
         Directory.CreateDirectory(squadDir);

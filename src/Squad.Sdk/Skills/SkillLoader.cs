@@ -1,5 +1,6 @@
 namespace Squad.Sdk.Skills;
 
+/// <summary>Discovers skill definitions from a squad's <c>.squad/skills/</c> directory.</summary>
 public static class SkillLoader
 {
     /// <summary>

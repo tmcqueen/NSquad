@@ -2,6 +2,7 @@ using System.Text.Json;
 
 namespace Squad.Sdk.CostTracker;
 
+/// <summary>Reads and aggregates cost log entries from the .squad/costs/ directory.</summary>
 public static class CostReader
 {
     private static readonly JsonSerializerOptions _options = new()

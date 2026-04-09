@@ -23,6 +23,10 @@ public static class HistorySplitter
         new(@"^#{1,3}\s*team updates",        RegexOptions.IgnoreCase | RegexOptions.Multiline),
     };
 
+    /// <summary>
+    /// Split <paramref name="history"/> into portable learnings and project-specific sections.
+    /// Project sections are appended under a labelled heading referencing <paramref name="sourceProject"/>.
+    /// </summary>
     public static string Split(string history, string sourceProject)
     {
         if (string.IsNullOrEmpty(history)) return history;
