@@ -157,6 +157,10 @@ public sealed class WatchCommand : AsyncCommand<WatchCommand.Settings>
         };
         using var proc = System.Diagnostics.Process.Start(psi);
         if (proc == null) return false;
+        // Read stdout and stderr concurrently to prevent pipe buffer deadlock
+        var stdoutTask = proc.StandardOutput.ReadToEndAsync(ct);
+        var stderrTask = proc.StandardError.ReadToEndAsync(ct);
+        await Task.WhenAll(stdoutTask, stderrTask);
         await proc.WaitForExitAsync(ct);
         return proc.ExitCode == 0;
     }

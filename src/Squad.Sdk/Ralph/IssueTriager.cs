@@ -53,7 +53,15 @@ public static class IssueTriager
 
         foreach (var rule in rules)
         {
-            if (!Regex.IsMatch(text, rule.Pattern, RegexOptions.IgnoreCase)) continue;
+            bool matched;
+            try
+            {
+                matched = Regex.IsMatch(text, rule.Pattern,
+                    RegexOptions.IgnoreCase | RegexOptions.NonBacktracking);
+            }
+            catch (ArgumentException) { continue; }
+
+            if (!matched) continue;
             var agent = roster.FirstOrDefault(m =>
                 m.Name.Equals(rule.AgentName, StringComparison.OrdinalIgnoreCase));
             if (agent != null)
