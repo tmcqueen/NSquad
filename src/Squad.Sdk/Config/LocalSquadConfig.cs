@@ -31,7 +31,11 @@ public sealed record LocalSquadConfig
             var json = File.ReadAllText(path);
             return JsonSerializer.Deserialize<LocalSquadConfig>(json, _opts) ?? new LocalSquadConfig();
         }
-        catch
+        catch (JsonException)
+        {
+            return new LocalSquadConfig();
+        }
+        catch (IOException)
         {
             return new LocalSquadConfig();
         }

@@ -23,7 +23,8 @@ public sealed record ScheduleEntry
     public string Name { get; init; } = "";
     public bool Enabled { get; init; } = true;
     public ScheduleTrigger Trigger { get; init; } = new();
-    public ScheduleTask Task { get; init; } = new("print", "echo hello");
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ScheduleTask? Task { get; init; }
     public List<string> Providers { get; init; } = new();
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public ScheduleRetry? Retry { get; init; }
