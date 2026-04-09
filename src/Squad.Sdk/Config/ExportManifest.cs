@@ -20,7 +20,7 @@ public sealed record ExportManifest
     public string ExportedAt { get; init; } = DateTimeOffset.UtcNow.ToString("O");
     /// <summary>Squad CLI version that produced this export.</summary>
     [JsonPropertyName("squad_version")]
-    public string SquadVersion { get; init; } = "0.1.0";
+    public string SquadVersion { get; init; } = "0.3.0";
     /// <summary>Casting configuration snapshot.</summary>
     public Dictionary<string, JsonElement> Casting { get; init; } = new();
     /// <summary>Agent data keyed by agent name.</summary>

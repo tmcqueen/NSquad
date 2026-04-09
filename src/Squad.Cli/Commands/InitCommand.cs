@@ -22,6 +22,26 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
         public bool Yes { get; init; }
     }
 
+    // Files that go directly into .squad/ (relative to templates dir → .squad/)
+    private static readonly string[] SquadTemplateFiles =
+    [
+        "casting-history.json",
+        "casting-policy.json",
+        "casting-registry.json",
+        "ceremonies.md",
+        "constraint-tracking.md",
+        "copilot-instructions.md",
+        "mcp-config.md",
+        "multi-agent-format.md",
+        "orchestration-log.md",
+        "plugin-marketplace.md",
+        "raw-agent-output.md",
+        "roster.md",
+        "routing.md",
+        "run-output.md",
+        "skill.md",
+    ];
+
     protected override async Task<int> ExecuteAsync(
         CommandContext context, Settings settings, CancellationToken ct)
     {
@@ -36,6 +56,13 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
             AnsiConsole.MarkupLine("[yellow]⚠[/]  squad.config.json already exists.");
             AnsiConsole.MarkupLine("[dim]Run with --yes to re-scaffold missing files.[/]");
             return 0;
+        }
+
+        var templatesDir = Path.Combine(AppContext.BaseDirectory, "templates");
+        if (!Directory.Exists(templatesDir))
+        {
+            AnsiConsole.MarkupLine("[red]✗[/] Templates directory not found: {0}", Markup.Escape(templatesDir));
+            return 1;
         }
 
         AnsiConsole.MarkupLine("[dim]Let's build your team.[/]");
@@ -55,44 +82,59 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
             Path.Combine(squadDir, "orchestration-log"),
             Path.Combine(squadDir, "log"),
         ];
-
         foreach (var dir in dirs)
             Directory.CreateDirectory(dir);
 
         // ── squad.config.json ────────────────────────────────────────────────
-        await WriteIfNotExistsAsync(configPath, GenerateSquadConfig(projectName), created, skipped, ct);
+        await WriteIfNotExistsAsync(configPath, GenerateSquadConfig(projectName), created, skipped, cwd, ct);
 
-        // ── .squad/team.md ───────────────────────────────────────────────────
+        // ── .squad/ template files ───────────────────────────────────────────
+        foreach (var name in SquadTemplateFiles)
+        {
+            var src = Path.Combine(templatesDir, name);
+            var dest = Path.Combine(squadDir, name);
+            if (File.Exists(src))
+                await CopyIfNotExistsAsync(src, dest, created, skipped, cwd, ct);
+        }
+
+        // ── .squad/team.md (generated — uses project name) ──────────────────
         await WriteIfNotExistsAsync(
             Path.Combine(squadDir, "team.md"),
             GenerateTeamMd(projectName),
-            created, skipped, ct);
+            created, skipped, cwd, ct);
 
         // ── .squad/decisions.md ──────────────────────────────────────────────
         await WriteIfNotExistsAsync(
             Path.Combine(squadDir, "decisions.md"),
             "# Squad Decisions\n\n## Active Decisions\n\nNo decisions recorded yet.\n\n## Governance\n\n- All meaningful changes require team consensus\n- Document architectural decisions here\n- Keep history focused on work, decisions focused on direction\n",
-            created, skipped, ct);
+            created, skipped, cwd, ct);
 
-        // ── .squad/routing.md ────────────────────────────────────────────────
-        await WriteIfNotExistsAsync(
-            Path.Combine(squadDir, "routing.md"),
-            GenerateRoutingMd(),
-            created, skipped, ct);
+        // ── Default agents: scribe + ralph ───────────────────────────────────
+        await ScaffoldAgentAsync("scribe", templatesDir, squadDir, created, skipped, cwd, ct);
+        await ScaffoldAgentAsync("ralph", templatesDir, squadDir, created, skipped, cwd, ct);
 
-        // ── .squad/ceremonies.md ─────────────────────────────────────────────
-        await WriteIfNotExistsAsync(
-            Path.Combine(squadDir, "ceremonies.md"),
-            GenerateCeremoniesMd(),
-            created, skipped, ct);
+        // ── .squad/identity/ ─────────────────────────────────────────────────
+        var identitySrc = Path.Combine(templatesDir, "identity");
+        if (Directory.Exists(identitySrc))
+            await CopyDirIfNotExistsAsync(identitySrc, Path.Combine(squadDir, "identity"), created, skipped, cwd, ct);
+
+        // ── .copilot/skills/ ─────────────────────────────────────────────────
+        var skillsSrc = Path.Combine(templatesDir, "skills");
+        var skillsDest = Path.Combine(cwd, ".copilot", "skills");
+        if (Directory.Exists(skillsSrc) && !Directory.Exists(skillsDest))
+        {
+            CopyDirRecursive(skillsSrc, skillsDest);
+            created.Add(Path.GetRelativePath(cwd, skillsDest));
+        }
 
         // ── .github/agents/squad.agent.md ───────────────────────────────────
-        var agentDir = Path.Combine(cwd, ".github", "agents");
-        Directory.CreateDirectory(agentDir);
-        await WriteIfNotExistsAsync(
-            Path.Combine(agentDir, "squad.agent.md"),
-            GenerateSquadAgentMd(projectName),
-            created, skipped, ct);
+        var agentSrc = Path.Combine(templatesDir, "squad.agent.md");
+        var agentDest = Path.Combine(cwd, ".github", "agents", "squad.agent.md");
+        Directory.CreateDirectory(Path.GetDirectoryName(agentDest)!);
+        if (File.Exists(agentSrc))
+            await CopyIfNotExistsAsync(agentSrc, agentDest, created, skipped, cwd, ct);
+        else
+            await WriteIfNotExistsAsync(agentDest, GenerateFallbackAgentMd(projectName), created, skipped, cwd, ct);
 
         // ── .gitattributes ───────────────────────────────────────────────────
         await AppendGitAttributesAsync(cwd, created, ct);
@@ -127,6 +169,7 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
         AnsiConsole.MarkupLine("[bold cyan]◆ SQUAD[/]");
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("  📁  Team workspace");
+        AnsiConsole.MarkupLine("  📋  Skills & ceremonies");
         AnsiConsole.MarkupLine("  🧠  Identity & wisdom");
         AnsiConsole.MarkupLine("  🔧  Workflows & config");
         AnsiConsole.MarkupLine("  🤖  Copilot agent prompt");
@@ -144,21 +187,79 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
         return 0;
     }
 
+    // ── Agent scaffolding ────────────────────────────────────────────────────
+
+    private static async Task ScaffoldAgentAsync(
+        string agentName, string templatesDir, string squadDir,
+        List<string> created, List<string> skipped, string cwd, CancellationToken ct)
+    {
+        var agentDir = Path.Combine(squadDir, "agents", agentName);
+        Directory.CreateDirectory(agentDir);
+
+        // charter.md: prefer scribe-charter.md for scribe, charter.md for others
+        var charterSrc = agentName == "scribe"
+            ? Path.Combine(templatesDir, "scribe-charter.md")
+            : Path.Combine(templatesDir, "charter.md");
+
+        var charterDest = Path.Combine(agentDir, "charter.md");
+        if (File.Exists(charterSrc))
+            await CopyIfNotExistsAsync(charterSrc, charterDest, created, skipped, cwd, ct);
+
+        // history.md
+        var historySrc = Path.Combine(templatesDir, "history.md");
+        var historyDest = Path.Combine(agentDir, "history.md");
+        if (File.Exists(historySrc))
+            await CopyIfNotExistsAsync(historySrc, historyDest, created, skipped, cwd, ct);
+    }
+
+    // ── File helpers ─────────────────────────────────────────────────────────
+
     private static async Task WriteIfNotExistsAsync(
         string path, string content,
-        List<string> created, List<string> skipped,
-        CancellationToken ct)
+        List<string> created, List<string> skipped, string cwd, CancellationToken ct)
     {
-        var rel = Path.GetRelativePath(Directory.GetCurrentDirectory(), path);
-        if (File.Exists(path))
-        {
-            skipped.Add(rel);
-            return;
-        }
+        var rel = Path.GetRelativePath(cwd, path);
+        if (File.Exists(path)) { skipped.Add(rel); return; }
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         await File.WriteAllTextAsync(path, content, ct);
         created.Add(rel);
     }
+
+    private static async Task CopyIfNotExistsAsync(
+        string src, string dest,
+        List<string> created, List<string> skipped, string cwd, CancellationToken ct)
+    {
+        var rel = Path.GetRelativePath(cwd, dest);
+        if (File.Exists(dest)) { skipped.Add(rel); return; }
+        Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
+        await using var srcStream = File.OpenRead(src);
+        await using var dstStream = File.Create(dest);
+        await srcStream.CopyToAsync(dstStream, ct);
+        created.Add(rel);
+    }
+
+    private static async Task CopyDirIfNotExistsAsync(
+        string srcDir, string destDir,
+        List<string> created, List<string> skipped, string cwd, CancellationToken ct)
+    {
+        Directory.CreateDirectory(destDir);
+        foreach (var srcFile in Directory.GetFiles(srcDir))
+        {
+            var dest = Path.Combine(destDir, Path.GetFileName(srcFile));
+            await CopyIfNotExistsAsync(srcFile, dest, created, skipped, cwd, ct);
+        }
+    }
+
+    private static void CopyDirRecursive(string src, string dest)
+    {
+        Directory.CreateDirectory(dest);
+        foreach (var file in Directory.GetFiles(src))
+            File.Copy(file, Path.Combine(dest, Path.GetFileName(file)), overwrite: false);
+        foreach (var dir in Directory.GetDirectories(src))
+            CopyDirRecursive(dir, Path.Combine(dest, Path.GetFileName(dir)));
+    }
+
+    // ── Content generators ───────────────────────────────────────────────────
 
     private static string GenerateSquadConfig(string projectName)
     {
@@ -203,74 +304,7 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
 
         """;
 
-    private static string GenerateRoutingMd() =>
-        """
-        # Work Routing
-
-        How to decide who handles what.
-
-        ## Routing Table
-
-        | Work Type | Route To | Examples |
-        |-----------|----------|----------|
-        | Code review | lead | Review PRs, check quality, suggest improvements |
-        | Testing | tester | Write tests, find edge cases, verify fixes |
-        | Session logging | scribe | Automatic — never needs routing |
-
-        ## Issue Routing
-
-        | Label | Action | Who |
-        |-------|--------|-----|
-        | `squad` | Triage: analyze issue, assign `squad:{member}` label | Lead |
-        | `squad:{name}` | Pick up issue and complete the work | Named member |
-
-        """;
-
-    private static string GenerateCeremoniesMd() =>
-        """
-        # Ceremonies
-
-        > Team meetings that happen before or after work. Each squad configures their own.
-
-        ## Design Review
-
-        | Field | Value |
-        |-------|-------|
-        | **Trigger** | auto |
-        | **When** | before |
-        | **Condition** | multi-agent task involving 2+ agents modifying shared systems |
-        | **Facilitator** | lead |
-        | **Participants** | all-relevant |
-        | **Enabled** | ✅ yes |
-
-        **Agenda:**
-        1. Review the task and requirements
-        2. Agree on interfaces and contracts between components
-        3. Identify risks and edge cases
-        4. Assign action items
-
-        ---
-
-        ## Retrospective
-
-        | Field | Value |
-        |-------|-------|
-        | **Trigger** | auto |
-        | **When** | after |
-        | **Condition** | build failure, test failure, or reviewer rejection |
-        | **Facilitator** | lead |
-        | **Participants** | all-involved |
-        | **Enabled** | ✅ yes |
-
-        **Agenda:**
-        1. What happened? (facts only)
-        2. Root cause analysis
-        3. What should change?
-        4. Action items for next iteration
-
-        """;
-
-    private static string GenerateSquadAgentMd(string projectName) =>
+    private static string GenerateFallbackAgentMd(string projectName) =>
         $"""
         ---
         name: Squad
@@ -278,14 +312,6 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
         ---
 
         You are **Squad (Coordinator)** — the orchestrator for this project's AI team.
-
-        ### Coordinator Identity
-
-        - **Name:** Squad (Coordinator)
-        - **Role:** Agent orchestration, handoff enforcement, reviewer gating
-        - **Inputs:** User request, repository state, `.squad/decisions.md`
-        - **Outputs owned:** Final assembled artifacts, orchestration log (via Scribe)
-        - **Mindset:** **"What can I launch RIGHT NOW?"** — always maximize parallel work
 
         Check: Does `.squad/team.md` exist?
         - **No** → Init Mode
@@ -301,14 +327,10 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
     {
         const string block = "\n# Squad merge drivers\n.squad/decisions.md merge=union\n";
         var path = Path.Combine(cwd, ".gitattributes");
-        var rel = Path.GetRelativePath(cwd, path);
-
         var existing = File.Exists(path) ? await File.ReadAllTextAsync(path, ct) : "";
-        if (existing.Contains(".squad/decisions.md"))
-            return;
-
+        if (existing.Contains(".squad/decisions.md")) return;
         await File.AppendAllTextAsync(path, block, ct);
-        created.Add(rel);
+        created.Add(Path.GetRelativePath(cwd, path));
     }
 
     private static async Task AppendGitIgnoreAsync(
@@ -316,15 +338,10 @@ public sealed class InitCommand : AsyncCommand<InitCommand.Settings>
     {
         const string block =
             "\n# Squad runtime state\n.squad/log/\n.squad/inbox/\n.squad/decisions/inbox/\n.squad/.init-prompt\n.squad-workstream\n";
-
         var path = Path.Combine(cwd, ".gitignore");
-        var rel = Path.GetRelativePath(cwd, path);
-
         var existing = File.Exists(path) ? await File.ReadAllTextAsync(path, ct) : "";
-        if (existing.Contains(".squad/log/"))
-            return;
-
+        if (existing.Contains(".squad/log/")) return;
         await File.AppendAllTextAsync(path, block, ct);
-        created.Add(rel);
+        created.Add(Path.GetRelativePath(cwd, path));
     }
 }

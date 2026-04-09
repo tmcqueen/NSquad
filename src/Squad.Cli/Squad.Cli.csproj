@@ -7,12 +7,17 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>squad</ToolCommandName>
     <PackageId>Squad.Cli</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.3.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.55.0" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
     <PackageReference Include="Spectre.Console.Json" Version="0.55.0" />
     <ProjectReference Include="..\Squad.Sdk\Squad.Sdk.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\templates\**"
+             Link="templates\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
