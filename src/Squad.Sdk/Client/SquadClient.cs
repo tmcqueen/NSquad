@@ -29,7 +29,7 @@ public sealed class SquadClient : IAsyncDisposable
         {
             CliPath = options?.CliPath,
             Cwd = options?.WorkingDirectory,
-            AutoRestart = options?.AutoRestart ?? true,
+            // AutoRestart = options?.AutoRestart ?? true,
             LogLevel = options?.LogLevel ?? "info",
             Environment = options?.Environment,
         };
