@@ -41,7 +41,7 @@ public static class SquadMarkdownGenerator
         sb.AppendLine("|------|------|---------|--------|");
         foreach (var agent in config.Agents)
         {
-            var name = char.ToUpper(agent.Name[0]) + agent.Name[1..];
+            var name = CapitalizeName(agent.Name);
             var role = agent.Role ?? agent.Name;
             sb.AppendLine($"| {name} | {role} | `.squad/agents/{agent.Name}/charter.md` | ✅ Active |");
         }
@@ -63,10 +63,13 @@ public static class SquadMarkdownGenerator
         return sb.ToString();
     }
 
+    private static string CapitalizeName(string name) =>
+        string.IsNullOrEmpty(name) ? name : char.ToUpper(name[0]) + name[1..];
+
     private static string GenerateCharterMd(AgentConfig agent, SquadConfig config)
     {
         var sb = new System.Text.StringBuilder(GeneratedHeader);
-        var name = char.ToUpper(agent.Name[0]) + agent.Name[1..];
+        var name = CapitalizeName(agent.Name);
         var role = agent.Role ?? agent.Name;
         sb.AppendLine($"# {name} — {role}\n");
 
