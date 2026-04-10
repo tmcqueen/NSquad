@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Squad.Server</AssemblyName>
+    <RootNamespace>Squad.Server</RootNamespace>
+    <Version>0.4.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Orleans.Server" Version="9.*" />
+    <PackageReference Include="Microsoft.Orleans.Streaming" Version="9.*" />
+    <ProjectReference Include="..\Squad.Sdk\Squad.Sdk.csproj" />
+  </ItemGroup>
+</Project>
