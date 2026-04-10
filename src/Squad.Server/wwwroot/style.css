@@ -1,0 +1,59 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: system-ui, sans-serif; background: #0d1117; color: #e6edf3; height: 100vh; display: flex; }
+
+#app { display: flex; width: 100%; height: 100%; }
+
+#agent-panel {
+  width: 200px; background: #161b22; padding: 1rem;
+  border-right: 1px solid #30363d; overflow-y: auto;
+}
+
+#agent-panel h2 { font-size: 0.85rem; text-transform: uppercase; color: #8b949e; margin-bottom: 0.75rem; }
+
+#agent-list { list-style: none; }
+
+#agent-list li {
+  padding: 0.5rem 0.75rem; border-radius: 6px; cursor: pointer;
+  font-size: 0.9rem; margin-bottom: 0.25rem;
+}
+
+#agent-list li:hover { background: #21262d; }
+#agent-list li.selected { background: #1f6feb; color: white; }
+#agent-list li.status-idle::before { content: "● "; color: #3fb950; }
+#agent-list li.status-processing::before { content: "● "; color: #d29922; }
+#agent-list li.status-suspended::before { content: "● "; color: #8b949e; }
+#agent-list li.status-error::before { content: "● "; color: #f85149; }
+
+#main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+#status-bar {
+  padding: 0.4rem 1rem; background: #161b22;
+  border-bottom: 1px solid #30363d; font-size: 0.8rem; color: #8b949e;
+}
+
+#message-stream {
+  flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;
+}
+
+.message { padding: 0.5rem 0.75rem; border-radius: 6px; max-width: 80%; line-height: 1.5; }
+.message.user { background: #1f6feb; align-self: flex-end; }
+.message.assistant { background: #21262d; align-self: flex-start; white-space: pre-wrap; }
+.message.error { background: #3d1f1f; color: #f85149; align-self: flex-start; }
+
+#input-panel {
+  display: flex; gap: 0.5rem; padding: 1rem;
+  border-top: 1px solid #30363d; background: #0d1117;
+}
+
+#prompt-input {
+  flex: 1; resize: none; background: #161b22; border: 1px solid #30363d;
+  color: #e6edf3; border-radius: 6px; padding: 0.5rem; font-size: 0.95rem;
+}
+
+#send-btn {
+  padding: 0 1.25rem; background: #1f6feb; color: white;
+  border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem;
+}
+
+#send-btn:hover { background: #388bfd; }
