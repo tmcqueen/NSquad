@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Squad Server</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <aside id="agent-panel">
+      <h2>Agents</h2>
+      <ul id="agent-list"></ul>
+    </aside>
+
+    <main id="main">
+      <div id="status-bar">
+        <span id="connection-status">Connecting...</span>
+      </div>
+
+      <div id="message-stream" aria-live="polite"></div>
+
+      <div id="input-panel">
+        <textarea id="prompt-input" placeholder="Type a message..." rows="3"></textarea>
+        <button id="send-btn">Send</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
