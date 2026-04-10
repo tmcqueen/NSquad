@@ -1,3 +1,5 @@
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/tmcqueen/NSquad?utm_source=oss&utm_medium=github&utm_campaign=tmcqueen%2FNSquad&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 # NSquad
 
 .NET 10 port of [Squad](https://github.com/bradygaster/squad) — a programmable multi-agent runtime for GitHub Copilot.
