@@ -9,14 +9,16 @@ namespace Squad.Server.Grains;
 /// Lead/orchestrator grain. Has agent management tools: WakeAgent, SuspendAgent,
 /// SendTo, GetAgentStatus. These are used when the LLM invokes them during a conversation.
 /// </summary>
-public sealed class SquadLeaderAgentGrain : AgentGrain, ITestSquadLeaderGrain
+
+[GrainType(Constants.SquadLeader), KeepAlive]
+public sealed class SquadLeaderAgentGrain : AgentGrain, IAgentGrain, ITestSquadLeaderGrain
 {
     private readonly IGrainFactory _grainFactory;
     private readonly ISquadConfigProvider _configProvider;
     private IReadOnlyList<AgentTool>? _tools;
 
     public SquadLeaderAgentGrain(
-        [PersistentState("agent", "agentStore")]
+        [PersistentState(Constants.Agent, Constants.AgentStateStore)]
         IPersistentState<AgentGrainState> state,
         ISquadClientFactory clientFactory,
         IGrainFactory grainFactory,
@@ -34,10 +36,10 @@ public sealed class SquadLeaderAgentGrain : AgentGrain, ITestSquadLeaderGrain
     {
         _tools ??=
         [
-            new AgentTool("WakeAgent", "Activate an agent by name", WakeAgentAsync),
-            new AgentTool("SuspendAgent", "Suspend an agent by name", SuspendAgentAsync),
-            new AgentTool("SendTo", "Send a message to a specific agent (format: 'agentName|prompt')", SendToAgentAsync),
-            new AgentTool("GetAgentStatus", "List all agents and their current status", GetAllStatusAsync),
+            new AgentTool(Constants.WakeAgent, "Activate an agent by name", WakeAgentAsync),
+            new AgentTool(Constants.SuspendAgent, "Suspend an agent by name", SuspendAgentAsync),
+            new AgentTool(Constants.SendTo, "Send a message to a specific agent (format: 'agentName|prompt')", SendToAgentAsync),
+            new AgentTool(Constants.GetAgentStatus, "List all agents and their current status", GetAllStatusAsync),
         ];
         return _tools;
     }

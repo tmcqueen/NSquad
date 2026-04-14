@@ -8,7 +8,7 @@
     <PackageReference Include="TUnit" Version="1.29.0" />
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <PackageReference Include="NSubstitute" Version="5.*" />
-    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="9.*" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" Version="10.*" />
     <ProjectReference Include="..\..\src\Squad.Server\Squad.Server.csproj" />
   </ItemGroup>
 </Project>

@@ -26,7 +26,7 @@ public abstract class AgentGrain : Grain, IAgentGrain
     private IAsyncStream<AgentStreamEvent>? _outputStream;
 
     protected AgentGrain(
-        [PersistentState("agent", "agentStore")]
+        [PersistentState(Constants.Agent, Constants.AgentStateStore)]
         IPersistentState<AgentGrainState> state,
         ISquadClientFactory clientFactory,
         ILogger logger)
@@ -46,8 +46,8 @@ public abstract class AgentGrain : Grain, IAgentGrain
 
     public override async Task OnActivateAsync(CancellationToken ct)
     {
-        var streamProvider = this.GetStreamProvider("AgentStreams");
-        var streamId = StreamId.Create("AgentOutput", this.GetPrimaryKeyString());
+        var streamProvider = this.GetStreamProvider(Constants.AgentStreams);
+        var streamId = StreamId.Create(Constants.AgentOutput, this.GetPrimaryKeyString());
         _outputStream = streamProvider.GetStream<AgentStreamEvent>(streamId);
 
         _state.State.CharterPath = GetCharterPath();
@@ -114,7 +114,7 @@ public abstract class AgentGrain : Grain, IAgentGrain
         _state.State.Status = AgentStatus.Processing;
         _state.State.MessageHistory.Add(new ChatMessage
         {
-            Role = "user",
+            Role = Constants.RoleUser,
             Content = prompt,
             Timestamp = DateTime.UtcNow,
         });
@@ -136,7 +136,7 @@ public abstract class AgentGrain : Grain, IAgentGrain
 
             _state.State.MessageHistory.Add(new ChatMessage
             {
-                Role = "assistant",
+                Role = Constants.RoleAssistant,
                 Content = fullResponse.ToString(),
                 Timestamp = DateTime.UtcNow,
             });
@@ -193,6 +193,7 @@ public abstract class AgentGrain : Grain, IAgentGrain
                 {
                     AgentName = _state.State.AgentName,
                     SystemMessageAppend = charterContent,
+                    AvailableTools = GetTools().Select(t => t.Name).ToList()
                 },
                 ct);
         }
