@@ -1,0 +1,13 @@
+{
+  "agents": [
+    {
+      "name": "ralph"
+    },
+    {
+      "name": "scribe"
+    },
+    {
+      "name": "squadleader"
+    }
+  ]
+}

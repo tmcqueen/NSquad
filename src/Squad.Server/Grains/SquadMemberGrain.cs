@@ -9,13 +9,15 @@ namespace Squad.Server.Grains;
 /// Configurable generic agent grain. Reads charter path from ISquadConfigProvider
 /// at activation time, keyed by grain primary key (agent name).
 /// </summary>
-public sealed class SquadMemberGrain : AgentGrain
+
+[GrainType(Constants.SquadMember)]
+public sealed class SquadMemberGrain : AgentGrain, IAgentGrain
 {
     private readonly ISquadConfigProvider _configProvider;
     private SquadMemberConfiguration? _config;
 
     public SquadMemberGrain(
-        [PersistentState("agent", "agentStore")]
+        [PersistentState(Constants.Agent, Constants.AgentStateStore)]
         IPersistentState<AgentGrainState> state,
         ISquadClientFactory clientFactory,
         ISquadConfigProvider configProvider,

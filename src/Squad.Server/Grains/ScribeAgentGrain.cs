@@ -8,10 +8,12 @@ namespace Squad.Server.Grains;
 /// <summary>
 /// Silent logger and decision merger. Observes all agent output streams passively.
 /// </summary>
-public sealed class ScribeAgentGrain : AgentGrain
+
+[GrainType(Constants.Scribe), KeepAlive]
+public sealed class ScribeAgentGrain : AgentGrain, IAgentGrain
 {
     public ScribeAgentGrain(
-        [PersistentState("agent", "agentStore")]
+        [PersistentState(Constants.Agent, Constants.AgentStateStore)]
         IPersistentState<AgentGrainState> state,
         ISquadClientFactory clientFactory,
         ILogger<ScribeAgentGrain> logger)

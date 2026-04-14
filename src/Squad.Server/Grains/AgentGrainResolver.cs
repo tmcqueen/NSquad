@@ -8,19 +8,15 @@ namespace Squad.Server.Grains;
  * Core agents (ralph, scribe, squadleader) use dedicated grain types.
  * All others use SquadMemberGrain.
  * </summary>
- */
+*/
 public static class AgentGrainResolver
 {
-    public static IAgentGrain Resolve(IGrainFactory factory, string agentName) =>
-        agentName.ToLowerInvariant() switch
-        {
-            "ralph" => factory.GetGrain<IAgentGrain>(
-                agentName, grainClassNamePrefix: nameof(RalphAgentGrain)),
-            "scribe" => factory.GetGrain<IAgentGrain>(
-                agentName, grainClassNamePrefix: nameof(ScribeAgentGrain)),
-            "squadleader" => factory.GetGrain<IAgentGrain>(
-                agentName, grainClassNamePrefix: nameof(SquadLeaderAgentGrain)),
-            _ => factory.GetGrain<IAgentGrain>(
-                agentName, grainClassNamePrefix: nameof(SquadMemberGrain)),
-        };
+    public static IAgentGrain Resolve(IGrainFactory factory, string agentName)
+    {
+        string prefix = string.Equals(agentName, Constants.Ralph, StringComparison.OrdinalIgnoreCase) ? nameof(RalphAgentGrain) :
+                        string.Equals(agentName, Constants.Scribe, StringComparison.OrdinalIgnoreCase) ? nameof(ScribeAgentGrain) :
+                        string.Equals(agentName, Constants.SquadLeader, StringComparison.OrdinalIgnoreCase) ? nameof(SquadLeaderAgentGrain) :
+                        nameof(SquadMemberGrain);
+        return factory.GetGrain<IAgentGrain>(agentName, grainClassNamePrefix: prefix);
+    }
 }

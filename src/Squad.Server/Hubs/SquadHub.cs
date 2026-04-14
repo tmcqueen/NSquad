@@ -17,8 +17,8 @@ public sealed class SquadHub : Hub
     private readonly IClusterClient _clusterClient;
     private readonly ISquadConfigProvider _configProvider;
 
-    // Per-connection stream subscriptions — cleaned up on disconnect
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, List<StreamSubscriptionHandle<AgentStreamEvent>>>
+    // Per-connection stream subscriptions: ConnectionId -> (AgentName -> Handle)
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, StreamSubscriptionHandle<AgentStreamEvent>>>
         _subscriptions = new();
 
     public SquadHub(
@@ -39,34 +39,36 @@ public sealed class SquadHub : Hub
     {
         var grain = AgentGrainResolver.Resolve(_grainFactory, agentName);
 
-        var streamProvider = _clusterClient.GetStreamProvider("AgentStreams");
-        var streamId = StreamId.Create("AgentOutput", agentName);
+        var streamProvider = _clusterClient.GetStreamProvider(Constants.AgentStreams);
+        var streamId = StreamId.Create(Constants.AgentOutput, agentName);
         var stream = streamProvider.GetStream<AgentStreamEvent>(streamId);
 
         var connectionId = Context.ConnectionId;
-        var handle = await stream.SubscribeAsync(async (evt, _) =>
-        {
-            switch (evt.Type)
-            {
-                case AgentStreamEventType.Delta:
-                    await Clients.Caller.SendAsync("OnDelta", agentName, evt.Text);
-                    break;
-                case AgentStreamEventType.Completed:
-                    await Clients.Caller.SendAsync("OnComplete", agentName);
-                    break;
-                case AgentStreamEventType.StatusChanged:
-                    await Clients.All.SendAsync("OnAgentStatusChanged", agentName, evt.Status?.ToString());
-                    break;
-                case AgentStreamEventType.Error:
-                    await Clients.Caller.SendAsync("OnError", agentName, evt.Text);
-                    break;
-            }
-        });
+        var connectionSubs = _subscriptions.GetOrAdd(connectionId, _ => new());
 
-        _subscriptions.AddOrUpdate(
-            connectionId,
-            _ => [handle],
-            (_, list) => { list.Add(handle); return list; });
+        if (!connectionSubs.ContainsKey(agentName))
+        {
+            var handle = await stream.SubscribeAsync(async (evt, _) =>
+            {
+                switch (evt.Type)
+                {
+                    case AgentStreamEventType.Delta:
+                        await Clients.Caller.SendAsync(Constants.OnDelta, agentName, evt.Text);
+                        break;
+                    case AgentStreamEventType.Completed:
+                        await Clients.Caller.SendAsync(Constants.OnComplete, agentName);
+                        break;
+                    case AgentStreamEventType.StatusChanged:
+                        await Clients.All.SendAsync(Constants.OnAgentStatusChanged, agentName, evt.Status?.ToString());
+                        break;
+                    case AgentStreamEventType.Error:
+                        await Clients.Caller.SendAsync(Constants.OnError, agentName, evt.Text);
+                        break;
+                }
+            });
+
+            connectionSubs.TryAdd(agentName, handle);
+        }
 
         await grain.SendAsync(prompt);
     }
@@ -111,9 +113,9 @@ public sealed class SquadHub : Hub
     /// <summary>Clean up stream subscriptions when a client disconnects.</summary>
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        if (_subscriptions.TryRemove(Context.ConnectionId, out var handles))
+        if (_subscriptions.TryRemove(Context.ConnectionId, out var connectionSubs))
         {
-            foreach (var handle in handles)
+            foreach (var handle in connectionSubs.Values)
             {
                 try { await handle.UnsubscribeAsync(); }
                 catch { /* best-effort cleanup */ }
