@@ -7,3 +7,6 @@ obj/
 TestResults/
 .mailmap
 .remember
+.external
+*.lscache
+server.log
